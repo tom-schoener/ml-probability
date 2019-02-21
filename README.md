@@ -1,2 +1,2 @@
 # ml-probability
-Collection of Machine learning with probability for my university thesis 
+Collection of probabilistic machine learning related projects for my university thesis 
