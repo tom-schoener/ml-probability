@@ -102,3 +102,13 @@ Air Quality Data Test Project
 ### Referenzen
 
 - Machine Learining: A Probabilistic Perspective (Kevin P. Murphy)
+
+## 05.03.2019
+
+- Fisher Scoring / Scoring algorithm https://en.wikipedia.org/wiki/Scoring_algorithm
+
+## 09.03.2019
+
+### Referenzen
+
+- TF Probability in 2.0 https://youtu.be/BrwKURU-wpk
