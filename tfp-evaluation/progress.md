@@ -40,7 +40,7 @@
 ### Referenzen:
 
 - MCMC presentation/lecture: https://youtu.be/h1NOS_wxgGg
-- Tensorflow probability presentation by one of its developers: https://www.youtube.com/watch?v=GqxmRKplj4w
+- Tensorflow probability presentation by one of its developers: https://www.youtube.com/watch?v=GqxmRKplj4w (Folien: https://docs.google.com/presentation/d/1BWhNVHzhFfYiFL8ynX1wFmag8YjzvHeqKkd8Z0G8H7Y/edit#slide=id.g3f2acb32c4_0_0)
 
 ### Mathematische Grundlagen
 
@@ -112,3 +112,4 @@ Air Quality Data Test Project
 ### Referenzen
 
 - TF Probability in 2.0 https://youtu.be/BrwKURU-wpk
+-
