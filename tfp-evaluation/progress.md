@@ -119,4 +119,12 @@ Air Quality Data Test Project
 
 ### 13.03.2019
 
-- Probabilistic Programming & Bayesian Methods for Hackers Chapter 1
+- Probabilistic Programming & Bayesian Methods for Hackers
+  - Chapter 1
+  - Chapter 2
+    - joint log probability functions
+    - Bayesian A/B testing
+
+### Referenzen
+
+- Visual Python Graph Tool DAFT: http://daft-pgm.org/
