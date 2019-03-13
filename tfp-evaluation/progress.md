@@ -112,4 +112,11 @@ Air Quality Data Test Project
 ### Referenzen
 
 - TF Probability in 2.0 https://youtu.be/BrwKURU-wpk
--
+
+## 10.03.2019
+
+- Variational Inference Introduction: https://www.youtube.com/watch?v=2pEkWk-LHmU
+
+### 13.03.2019
+
+- Probabilistic Programming & Bayesian Methods for Hackers Chapter 1
