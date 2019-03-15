@@ -128,3 +128,13 @@ Air Quality Data Test Project
 ### Referenzen
 
 - Visual Python Graph Tool DAFT: http://daft-pgm.org/
+
+## 15.03.2019
+
+- Probabilistic Programming & Bayesian Methods for Hackers
+  - Chapter 3
+- cutom model prediction with MCMC
+
+### Referenzen
+
+- Andrew Rowan - Bayesian Deep Learning with Edward (and a trick using Dropout): https://www.youtube.com/watch?v=I09QVNrUS3Q
