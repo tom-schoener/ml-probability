@@ -138,3 +138,13 @@ Air Quality Data Test Project
 ### Referenzen
 
 - Andrew Rowan - Bayesian Deep Learning with Edward (and a trick using Dropout): https://www.youtube.com/watch?v=I09QVNrUS3Q
+- NIPS (Bayesian Deep Learning) http://bayesiandeeplearning.org/
+
+## 16.03.2019
+
+- Layers API with Keras
+- Air Quality Dataset Keras Model (simple)
+
+### Referenzen
+
+- TFP Probabilistic Layers: Regression: https://colab.research.google.com/github/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Probabilistic_Layers_Regression.ipynb
