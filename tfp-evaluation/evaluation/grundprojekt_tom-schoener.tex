@@ -1,0 +1,140 @@
+\documentclass[12pt]{article}
+
+\usepackage[section]{placeins}
+\usepackage[font={small,it}]{caption}
+\usepackage[% 
+                  bookmarks,% 
+                  bookmarksopen=false,% Klappt die Bookmarks in Acrobat aus 
+                  pdfauthor={Tom Schöner},% 
+                  pdftitle={TFP Evaluation},% 
+                  colorlinks=true,% 
+                  linkcolor=blue,% 
+                  citecolor=red,%
+                ]{hyperref}
+\usepackage{multicol}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{ngerman}
+
+\usepackage[utf8]{inputenc}
+\usepackage{siunitx}
+\usepackage[numbers]{natbib} % omit 'round' option if you prefer square brackets
+\usepackage{wrapfig}
+
+\usepackage{microtype}% verbesserter Randausgleich
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+   {\normalfont\Large\bfseries\raggedright}{\thesection}{1em}{}
+\titleformat{\subsection}
+   {\normalfont\large\bfseries\raggedright}{\thesubsection}{0.8em}{}
+
+\hypersetup{pageanchor=false}
+\linespread{1.15}
+
+\renewenvironment{quote}{%
+   \list{}{%
+     \leftmargin0.3cm   % this is the adjusting screw
+     \rightmargin\leftmargin
+   }
+   \item\relax
+}
+{\endlist}
+
+\bibliographystyle{plainnat}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\begin{center}
+ 
+%----------------------------------------------------------------------------------------
+%	HEADING SECTIONS
+%----------------------------------------------------------------------------------------
+
+\textsc{\LARGE HAW Hamburg}\\[0.5cm] % Name of your university/college
+\textsc{\LARGE Informatik Master}\\[1.5cm] % Name of your university/college
+\textsc{\Large Grundprojekt}\\[0.5cm] % Major heading such as course name
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+
+{ \Huge \bfseries TFP Evaluation}\\[0.2cm] % Title of your document
+{ \Huge \bfseries --}\\[0.5cm] % Title of your document
+
+\HRule \\[1.5cm]
+
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}{\textwidth}
+\begin{flushleft} \large
+\emph{Bearbeiter:}\\
+Tom Schöner (2182801) \linebreak
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{\textwidth}
+\begin{flushleft} \large
+\emph{Betreuung:} \\
+Prof. Dr. Olaf Zukunft
+\end{flushleft}
+\end{minipage}\\[4cm]
+
+%----------------------------------------------------------------------------------------
+%	DATE SECTION
+%----------------------------------------------------------------------------------------
+
+\vspace{\fill} % Fill the rest of the page with whitespace
+
+{\large \today}\\[3cm] % Date, change the \today to a set date if you want to be precise
+
+\end{center}
+
+\end{titlepage}
+
+
+%----------------------------------------------------------------------------------------
+
+\tableofcontents
+
+\newpage
+
+\listoffigures
+\listoftables
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	Content
+%----------------------------------------------------------------------------------------
+%\setlength\columnsep{1cm}
+%\twocolumn
+
+\section{Abstract}
+\label{abstract}
+Content
+
+%----------------------------------------------------------------------------------------
+%	Bibliography
+%----------------------------------------------------------------------------------------
+\newpage
+
+\typeout{===== Section: literature}
+%\bibliography{bibs/bibs}
+
+
+\end{document}
