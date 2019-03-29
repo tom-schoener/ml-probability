@@ -128,12 +128,13 @@ Prof. Dr. Olaf Zukunft
 Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} ermöglicht eine probabilistische Herangehensweise der Modellierung in Tensorflow.
 Mittels einer breiten Masse an vorhandenen Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Keras Layer, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von Tensorflow Probability wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
 
-In dieser Evaluation soll die Bibliothek auf ihre Benutzerfreundlichkeit inklusive Dokumentation, Handhabung beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Die Kategorie Maschinelles Lernen mit Hilfe von neuronalen Netzen ist hierbei als Schwerpunkt anzusehen, dabei werde ich auch gesondert auf die Integration für Keras eingehen.
+In dieser Evaluation soll die Bibliothek auf ihre Benutzerfreundlichkeit, was unter Anderem die Dokumentation einschließt, Handhabung beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Die Kategorie Maschinelles Lernen mit Hilfe von neuronalen Netzen ist hierbei als Schwerpunkt anzusehen, dabei werde ich auch gesondert auf die Integration für Keras eingehen.
 
 \section{Tensorflow Probability Komponenten}
 \label{sec:tfp-components}
 
 \subsection{Layers}
+Die Struktur von Tensorflow Probability lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Modelle erstellen, sollte man mit \textit{Bijectors} aus Schicht 1 vertraut sein.
 
 \subsubsection{Layer 0: Tensorflow}
 
@@ -146,13 +147,18 @@ Edward2 / Probabilistic Layers with Keras / Trainable Distributions
 \subsubsection{Layer 3: Probabilistic Inference}
 MCMC / VI / Optimizers
 
-\section{Dokumentation}
+\section{Benutzerfreundlichkeit}
+\subsection{Dokumentation}
 
-\section{Verwendung?}
+
+\section{Integration in Tensorflow}
+
+\section{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
+
+Das Jupyter Notebook ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar.
 
 \section{Fazit}
 
-\citation{}
 
 %----------------------------------------------------------------------------------------
 %	Bibliography
