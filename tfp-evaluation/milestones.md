@@ -21,4 +21,3 @@
 ## 18.03.2019 - 31.03.2019
 
 - Evalutation von Tensorflow Probability
-- ... (_noch offen_)
