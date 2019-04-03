@@ -125,16 +125,16 @@ Prof. Dr. Olaf Zukunft
 
 \section{Abstract}
 \label{abstract}
-Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} ermöglicht eine probabilistische Herangehensweise der Modellierung in Tensorflow.
-Mittels einer breiten Masse an vorhandenen Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Keras Layer, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von Tensorflow Probability wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
+Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} erweitert das Framework um ein probabilistische Komponente.
+Mittels einer breiten Masse an bereitgestellten Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Schichten für neronale Netze, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von Tensorflow Probability wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
 
-In dieser Evaluation soll die Bibliothek auf ihre Benutzerfreundlichkeit, was unter Anderem die Dokumentation einschließt, Handhabung beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Die Kategorie Maschinelles Lernen mit Hilfe von neuronalen Netzen ist hierbei als Schwerpunkt anzusehen, dabei werde ich auch gesondert auf die Integration für Keras eingehen.
+In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effektivität beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Das maschinelle Lernen mit Hilfe von neuronalen Netzen und deren Abstraktion durch Keras ist hierbei als Schwerpunkt anzusehen.
 
 \section{Tensorflow Probability Komponenten}
 \label{sec:tfp-components}
 
 \subsection{Layers}
-Die Struktur von Tensorflow Probability lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Modelle erstellen, sollte man mit \textit{Bijectors} aus Schicht 1 vertraut sein.
+Die Struktur von Tensorflow Probability lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Parameter seines probabilistischen Modells mittels Sampling ermitteln, sollten \textit{Bijectors} aus Schicht 1 kein Fremdwort sein.
 
 \subsubsection{Layer 0: Tensorflow}
 
@@ -147,8 +147,7 @@ Edward2 / Probabilistic Layers with Keras / Trainable Distributions
 \subsubsection{Layer 3: Probabilistic Inference}
 MCMC / VI / Optimizers
 
-\section{Benutzerfreundlichkeit}
-\subsection{Dokumentation}
+\section{Pragmatik und Semantik}
 
 
 \section{Integration in Tensorflow}
@@ -170,3 +169,5 @@ Das Jupyter Notebook ist unter \url{https://github.com/tom-schoener/ml-probabili
 
 
 \end{document}
+
+
