@@ -20,6 +20,8 @@
 \usepackage{siunitx}
 \usepackage{ngerman}
 
+\usepackage{xparse}
+
 \usepackage[utf8]{inputenc}
 \usepackage{siunitx}
 \usepackage[numbers]{natbib} % omit 'round' option if you prefer square brackets
@@ -28,6 +30,38 @@
 \usepackage{microtype}% verbesserter Randausgleich
 
 \usepackage{titlesec}
+
+
+\usepackage{listings}
+
+\usepackage{color}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.99,0.99,0.99}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+ 
+\lstset{style=mystyle}
 
 \titleformat{\section}
    {\normalfont\Large\bfseries\raggedright}{\thesection}{1em}{}
@@ -125,8 +159,8 @@ Prof. Dr. Olaf Zukunft
 
 \section{Abstract}
 \label{abstract}
-Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} erweitert das Framework um ein probabilistische Komponente.
-Mittels einer breiten Masse an bereitgestellten Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Schichten für neronale Netze, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von Tensorflow Probability wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
+Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} - fortan mit \textit{TFP} abgekürzt - erweitert das Framework um eine probabilistische Komponente.
+Mittels einer breiten Masse an bereitgestellten Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Erweiterungen für neronale Netze, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von TFP wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
 
 In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effektivität beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Das maschinelle Lernen mit Hilfe von neuronalen Netzen und deren Abstraktion durch Keras ist hierbei als Schwerpunkt anzusehen.
 
@@ -134,12 +168,38 @@ In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effekt
 \label{sec:tfp-components}
 
 \subsection{Layers}
-Die Struktur von Tensorflow Probability lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Parameter seines probabilistischen Modells mittels Sampling ermitteln, sollten \textit{Bijectors} aus Schicht 1 kein Fremdwort sein.
+Die Struktur von TFP lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Parameter seines probabilistischen Modells mittels Sampling ermitteln, sollten \textit{Bijectors} aus Schicht 1 kein Fremdwort sein.
 
 \subsubsection{Layer 0: Tensorflow}
+TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden mit demselben Berechnungsmodel mittels Tensorflow Sessions oder im \textit{Eager}-Modus für sofortige Berechnungen ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
 
 \subsubsection{Layer 1: Statistical Building Blocks}
-Verteilungen / Bijectors
+(Verteilungen / Bijectors)
+
+Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. 
+
+Auch verschiedenste, für probabilistische Modelle essentielle Verteilungen im Modul \textbf{tfp.distributions} lassen sich dieser Schicht zuordnen: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen.
+
+%TODO: Shapes algemein + Eventshape
+%TODO: Normaldist erklären
+% $X \sim \mathcal{N}(\mu,\,\sigma^{2})$
+
+Abbildung \ref{fig:normal_dist}
+\begin{lstlisting}[language=Python]
+normal_dist = tfd.Normal(name="N", loc=0., scale=1.)
+# -> tfp.distributions.Normal("N/", batch_shape=(), event_shape=(), dtype=float32)
+
+sample = normal_dist.sample(sample_shape=normal_sample_size)
+\end{lstlisting}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./figs/normal-dist.png}
+    \caption{$X \sim \mathcal{N}(0,\, 1)$ mit 2500 Samples}
+    \label{fig:normal_dist}
+\end{figure}
+
 
 \subsubsection{Layer 2: Model Building}
 Edward2 / Probabilistic Layers with Keras / Trainable Distributions
