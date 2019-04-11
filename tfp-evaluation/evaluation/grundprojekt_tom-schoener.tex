@@ -193,8 +193,8 @@ normal_dist.prob(1.0)
 # tf.Tensor(0.24197072, shape=(), dtype=float32)
 \end{lstlisting}
 
-\textit{Broadcasting, Batching und Shapes} sorgen dafür, dass unabhängige Verteilungen als Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
-% TODO batching... besser erklären + event shapes
+\textit{Broadcasting, Batching und Shapes} sorgen dafür, dass unabhängige Verteilungen als Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ durch \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
+% TODO auf event shapes eingehen
 
 \begin{figure}[h]
     \centering
@@ -203,11 +203,15 @@ normal_dist.prob(1.0)
     \label{fig:normal_dist}
 \end{figure}
 
+Ein weiterer Bestandteil von Layer 1 sind \textit{Bijectors}. Bijectors bilden eine Zahl aus $\mathbb{R}^n$ auf $\mathbb{R}^m$ ab oder jeweils einer Submenge dieser. Aufgrund der im Bijector hinterlegten bijektiven Funktion ist dieser Schritt umkehrbar, daher: $x = f^{-1}(f(x))$. Dies ist besonders bei der Transformierung von Samples aus Verteilungen nützlich und wird folglich für das Erstellen von Modellen (Abschnitt \ref{sec:layer2}) und Berechnungen probabilistischer Interferenzen (Abschnitt \ref{sec:layer3}) eingesetzt. TFP bietet bereits einige vorgefertigte Bijectors unter \textbf{tfp.bijectors}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors}} an. 
+
 
 \subsubsection{Layer 2: Model Building}
+\label{sec:layer2}
 Edward2 / Probabilistic Layers with Keras / Trainable Distributions
 
 \subsubsection{Layer 3: Probabilistic Inference}
+\label{sec:layer3}
 MCMC / VI / Optimizers
 
 \section{Pragmatik und Semantik}
