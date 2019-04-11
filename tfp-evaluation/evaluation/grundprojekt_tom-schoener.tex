@@ -149,7 +149,7 @@ Prof. Dr. Olaf Zukunft
 \newpage
 
 \listoffigures
-\listoftables
+%\listoftables
 
 \newpage
 
@@ -174,24 +174,27 @@ Die Struktur von TFP lässt sich, wie aus der Dokumentation zu entnehmen ist\foo
 TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden mit demselben Berechnungsmodel mittels Tensorflow Sessions oder im \textit{Eager}-Modus für sofortige Berechnungen ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
 
 \subsubsection{Layer 1: Statistical Building Blocks}
-(Verteilungen / Bijectors)
 
-Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. 
+Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich unter Anderem Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. Diese Funktionen sind auf die Verwendung von Tensoren ausgelegt, lassen sich im Normalfall aber auch mit normalen n-dimensionalen Python Arrays oder Numpy Arrays aufrufen.  
 
-Auch verschiedenste, für probabilistische Modelle essentielle Verteilungen im Modul \textbf{tfp.distributions} lassen sich dieser Schicht zuordnen: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen.
+Verschiedenste, für probabilistische Modelle essentielle Verteilungen reihen sich unter dem Modul \textbf{tfp.distributions} in dieser Schicht ein: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen. Generell erben Klassen für Verteilungen (wie etwa die Normalverteilung) von der Klasse \textbf{tfp.distributions.Distribution}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution}}. Diese gemeinsame Schnittstelle vereinfacht die Benutzung und fordert eine Implementation für hilfreiche Methoden wie für logarithmische Wahrscheinlichkeit oder Sampling. Am Beispiel der Normalverteilung mit der Definition $X \sim \mathcal{N}(\mu,\,\sigma^{2})$ lässt sich die Schnittstelle für Verteilungen verdeutlichen (siehe Listing \ref{lst:normal}). Visualisiert man die Verteilung auf Basis der Samples ergibt sich Abbildung \ref{fig:normal_dist}.
 
-%TODO: Shapes algemein + Eventshape
-%TODO: Normaldist erklären
-% $X \sim \mathcal{N}(\mu,\,\sigma^{2})$
-
-Abbildung \ref{fig:normal_dist}
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=Python, caption={Verwendung der Klasse tfp.distributions.Normal}, label={lst:normal}]
 normal_dist = tfd.Normal(name="N", loc=0., scale=1.)
-# -> tfp.distributions.Normal("N/", batch_shape=(), event_shape=(), dtype=float32)
+# tfp.distributions.Normal("N/", batch_shape=(), event_shape=(), dtype=float32)
 
 sample = normal_dist.sample(sample_shape=normal_sample_size)
+# <tf.Tensor: id=188, shape=(2500,), dtype=float32, numpy=array([-0.45733708, -0.19126031, -0.33290815, ..., -1.1285563 , -0.6958163 ,  0.552399  ], dtype=float32)>
+
+normal_dist.mean() 
+# tf.Tensor(0.0, shape=(), dtype=float32)
+
+normal_dist.prob(1.0) 
+# tf.Tensor(0.24197072, shape=(), dtype=float32)
 \end{lstlisting}
 
+\textit{Broadcasting, Batching und Shapes} sorgen dafür, dass unabhängige Verteilungen als Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
+% TODO batching... besser erklären + event shapes
 
 \begin{figure}[h]
     \centering
@@ -208,7 +211,6 @@ Edward2 / Probabilistic Layers with Keras / Trainable Distributions
 MCMC / VI / Optimizers
 
 \section{Pragmatik und Semantik}
-
 
 \section{Integration in Tensorflow}
 
