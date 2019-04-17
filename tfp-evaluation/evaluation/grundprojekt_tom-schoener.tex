@@ -105,9 +105,8 @@
 
 \HRule \\[0.4cm]
 
-{ \LARGE \bfseries TensorFlow Probability}\\[0.5cm]
-{ \large Evaluation der Bibliothek für}\\[0cm]
-{ \large probabilistische und statistische Analysen}
+{ \large \bfseries Evaluation von TensorFlow Probability}\\[0.1cm]
+{ \large für statistische Analysen}\\[0cm]
 
 \HRule \\[2.0cm]
 
@@ -149,7 +148,7 @@ Prof. Dr. Olaf Zukunft
 \newpage
 
 \listoffigures
-%\listoftables
+\lstlistoflistings
 
 \newpage
 
@@ -166,14 +165,12 @@ In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effekt
 
 \section{Tensorflow Probability Komponenten}
 \label{sec:tfp-components}
-
-\subsection{Layers}
 Die Struktur von TFP lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Parameter seines probabilistischen Modells mittels Sampling ermitteln, sollten \textit{Bijectors} aus Schicht 1 kein Fremdwort sein.
 
-\subsubsection{Layer 0: Tensorflow}
+\subsection{Schicht 0: Tensorflow}
 TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden mit demselben Berechnungsmodel mittels Tensorflow Sessions oder im \textit{Eager}-Modus für sofortige Berechnungen ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
 
-\subsubsection{Layer 1: Statistical Building Blocks}
+\subsection{Schicht 1: Statistical Building Blocks}
 
 Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich unter Anderem Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. Diese Funktionen sind auf die Verwendung von Tensoren ausgelegt, lassen sich im Normalfall aber auch mit normalen n-dimensionalen Python Arrays oder Numpy Arrays aufrufen.  
 
@@ -203,32 +200,62 @@ normal_dist.prob(1.0)
     \label{fig:normal_dist}
 \end{figure}
 
-Ein weiterer Bestandteil von Layer 1 sind \textit{Bijectors}. Bijectors bilden eine Zahl aus $\mathbb{R}^n$ auf $\mathbb{R}^m$ ab oder jeweils einer Submenge dieser. Aufgrund der im Bijector hinterlegten bijektiven Funktion ist dieser Schritt umkehrbar, daher: $x = f^{-1}(f(x))$. Dies ist besonders bei der Transformierung von Samples aus Verteilungen nützlich und wird folglich für das Erstellen von Modellen (Abschnitt \ref{sec:layer2}) und Berechnungen probabilistischer Interferenzen (Abschnitt \ref{sec:layer3}) eingesetzt. TFP bietet bereits einige vorgefertigte Bijectors unter \textbf{tfp.bijectors}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors}} an. 
+Ein weiterer Bestandteil von Schicht 1 sind \textit{Bijectors}. Bijectors bilden eine Zahl aus $\mathbb{R}^n$ auf $\mathbb{R}^m$ ab oder jeweils einer Submenge dieser. Aufgrund der im Bijector hinterlegten bijektiven Funktion ist dieser Schritt umkehrbar, daher: $x = f^{-1}(f(x))$. Dies ist besonders bei der Transformierung von Stichproben aus Verteilungen nützlich und wird folglich für das Erstellen von Modellen (Abschnitt \ref{sec:layer2}) und Berechnungen probabilistischer Interferenzen (Abschnitt \ref{sec:layer3}) eingesetzt. TFP bietet bereits einige vorgefertigte Bijectors unter \textbf{tfp.bijectors}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors}} an. 
 
 
-\subsubsection{Layer 2: Model Building}
+\subsection{Schicht 2: Model Building}
 \label{sec:layer2}
 % TODO: Edward2
 Edward2 / Probabilistic Layers with Keras / Trainable Distributions
 
 In Abschnitt \ref{sec:example_air_quality} wird die Verwendung und probabilistischen Layers mit Keras anhand eines Beispiels verdeutlicht.
 
-\subsubsection{Layer 3: Probabilistic Inference}
+\subsection{Schicht 3: Probabilistic Inference}
 \label{sec:layer3}
-Als letzte Schicht enthält TFP Werkzeuge für probabilistische Inferenz. Dazu gehören \textit{Marcov chan Monte Carlo (MCMC)} Algorithmen, \textit{Variational Inference} Algorithmen und stochastische Optimierungsverfahren.
-% TODO MCMC Beispiel einbinden und erklären \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/mcmc.ipynb}
+Als letzte Schicht enthält TFP Werkzeuge für probabilistische Inferenz. Dazu gehören \textit{Marcov chain Monte Carlo (MCMC)} Algorithmen, \textit{Variational Inference} Algorithmen und stochastische Optimierungsverfahren. 
+Durch Sampling ermöglicht MCMC das Berechnen statistischer Modelle mit einer hohen Anzahl an Parametern. Eine analytische Herangehensweise ist bereits ab wenigen Parametern nicht mehr sinnvoll, da hierzu das Berechnen eines multidimensionalen Integrals erforderlich wäre. TFP bietet mehrere MCMC Algorithmen unter \textbf{tfp.mcmc} an. 
+
+Listing \ref{lst:mcmc} zeigt einen Ausschnitt der Verwendung des Hamiltonian Monte Carlo Algorithmus. Die hier nicht gezeigte Auswertung würde in einer approximierten Verteilung des Parameters \textit{tau} für das gegebene Modell \textit{\_data\_model} resultieren. Ein praxisbezogenes und ausführlicheres Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/mcmc.ipynb} einsehbar.
+
+\begin{lstlisting}[language=Python, caption={Verwendung des Hamiltonian Monte Carlo Algorithmus (gekürzt)}, label={lst:mcmc}]
+# Set the chain's start state.
+initial_chain_state = [ 0.5 * tf.ones([], dtype=tf.float32, name="init_tau") ]
+
+def joint_log_prob(_data_model, tau):
+  rv_tau = tfd.Uniform()
+  rv_observation = tfd.Poisson(rate=rv_tau)
+
+  return rv_tau.log_prob(tau) + tf.reduce_sum(rv_observation.log_prob(_data_model))
+
+# setup the chain
+[ tau ], kernel_results = tfp.mcmc.sample_chain(
+  num_results=1000,
+  num_burnin_steps=500,
+  current_state=initial_chain_state,
+  kernel=tfp.mcmc.TransformedTransitionKernel(
+    inner_kernel=tfp.mcmc.HamiltonianMonteCarlo(
+      target_log_prob_fn=lambda tau: joint_log_prob(_data_model, tau)),
+    bijector=[ tfp.bijectors.Sigmoid() ] # Maps [0,1] to R  
+  )
+)
+\end{lstlisting}
+
+Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der in der Literatur verwendeten Sprache, wodurch die Übertragung von Konzepten aus unterschiedlichen Quellen deutlich vereinfacht wird. 
+
 % TODO VI und Optimierungsverfahren kurz erklären
 
 \section{Pragmatik und Semantik}
 
 \section{Integration in Tensorflow}
 
-\section{Anwendungen}
+\section{Anwendungsgebiete}
 
 \section{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
 \label{sec:example_air_quality}
 
-Das Jupyter Notebook ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar.
+Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar.
+
+
 
 \section{Fazit}
 
