@@ -147,11 +147,6 @@ Prof. Dr. Olaf Zukunft
 
 \newpage
 
-\listoffigures
-\lstlistoflistings
-
-\newpage
-
 %----------------------------------------------------------------------------------------
 %	Content
 %----------------------------------------------------------------------------------------
@@ -168,13 +163,13 @@ In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effekt
 Die Struktur von TFP lässt sich, wie aus der Dokumentation zu entnehmen ist\footnote{\url{https://www.tensorflow.org/probability/overview}}, in die folgenden vier Schichten einteilen. Die Schichten bauen hierarchisch aufeinander auf, abstrahieren die unterliegenden Schichten aber nicht zwangsläufig. Möchte man beispielsweise durch \textit{MCMC} in Schicht 3 Parameter seines probabilistischen Modells mittels Sampling ermitteln, sollten \textit{Bijectors} aus Schicht 1 kein Fremdwort sein.
 
 \subsection{Schicht 0: Tensorflow}
-TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden mit demselben Berechnungsmodel mittels Tensorflow Sessions oder im \textit{Eager}-Modus für sofortige Berechnungen ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
+TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden innerhalb von Tensorflow Sessions oder im \textit{Eager}-Modus ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
 
 \subsection{Schicht 1: Statistical Building Blocks}
 
-Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich unter Anderem Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. Diese Funktionen sind auf die Verwendung von Tensoren ausgelegt, lassen sich im Normalfall aber auch mit normalen n-dimensionalen Python Arrays oder Numpy Arrays aufrufen.  
+Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich unter Anderem Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. Diese Funktionen sind auf die Verwendung von Tensoren ausgelegt, lassen sich generell aber auch mit normalen n-dimensionalen Python Arrays oder Numpy Arrays aufrufen.  
 
-Verschiedenste, für probabilistische Modelle essentielle Verteilungen reihen sich unter dem Modul \textbf{tfp.distributions} in dieser Schicht ein: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen. Generell erben Klassen für Verteilungen (wie etwa die Normalverteilung) von der Klasse \textbf{tfp.distributions.Distribution}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution}}. Diese gemeinsame Schnittstelle vereinfacht die Benutzung und fordert eine Implementation für hilfreiche Methoden wie für logarithmische Wahrscheinlichkeit oder Sampling. Am Beispiel der Normalverteilung mit der Definition $X \sim \mathcal{N}(\mu,\,\sigma^{2})$ lässt sich die Schnittstelle für Verteilungen verdeutlichen (siehe Listing \ref{lst:normal}). Visualisiert man die Verteilung auf Basis der Samples ergibt sich Abbildung \ref{fig:normal_dist}.
+Verschiedenste, für probabilistische Modelle essentielle Verteilungen reihen sich unter dem Modul \textbf{tfp.distributions} in dieser Schicht ein: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen. Generell erben Klassen für Verteilungen, wie etwa die Normalverteilung, von der Klasse \textbf{tfp.distributions.Distribution}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution}}. Diese gemeinsame Schnittstelle standardisiert die Benutzung. Sie fordert zudem Implementationen mehrerer hilfreicher Methoden wie etwa für die logarithmische Wahrscheinlichkeit oder dem Mittelwert. Am Beispiel der Normalverteilung mit der Definition $X \sim \mathcal{N}(\mu,\,\sigma^{2})$ sind im Folgenden einige der Funktionen aufgeführt (siehe Listing \ref{lst:normal}). Visualisiert man die Verteilung auf Basis der Samples \textit{sample} (Zeile 5) ergibt sich Abbildung \ref{fig:normal_dist}.
 
 \begin{lstlisting}[language=Python, caption={Verwendung der Klasse tfp.distributions.Normal}, label={lst:normal}]
 normal_dist = tfd.Normal(name="N", loc=0., scale=1.)
@@ -190,7 +185,7 @@ normal_dist.prob(1.0)
 # tf.Tensor(0.24197072, shape=(), dtype=float32)
 \end{lstlisting}
 
-\textit{Broadcasting, Batching und Shapes} sorgen dafür, dass unabhängige Verteilungen als Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ durch \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
+\textit{Broadcasting, Batching} und \textit{Shapes} sorgen dafür, dass unabhängige Verteilungen als sogenannter Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
 % TODO auf event shapes eingehen
 
 \begin{figure}[h]
@@ -213,9 +208,10 @@ In Abschnitt \ref{sec:example_air_quality} wird die Verwendung und probabilistis
 \subsection{Schicht 3: Probabilistic Inference}
 \label{sec:layer3}
 Als letzte Schicht enthält TFP Werkzeuge für probabilistische Inferenz. Dazu gehören \textit{Marcov chain Monte Carlo (MCMC)} Algorithmen, \textit{Variational Inference} Algorithmen und stochastische Optimierungsverfahren. 
-Durch Sampling ermöglicht MCMC das Berechnen statistischer Modelle mit einer hohen Anzahl an Parametern. Eine analytische Herangehensweise ist bereits ab wenigen Parametern nicht mehr sinnvoll, da hierzu das Berechnen eines multidimensionalen Integrals erforderlich wäre. TFP bietet mehrere MCMC Algorithmen unter \textbf{tfp.mcmc} an. 
 
-Listing \ref{lst:mcmc} zeigt einen Ausschnitt der Verwendung des Hamiltonian Monte Carlo Algorithmus. Die hier nicht gezeigte Auswertung würde in einer approximierten Verteilung des Parameters \textit{tau} für das gegebene Modell \textit{\_data\_model} resultieren. Ein praxisbezogenes und ausführlicheres Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/mcmc.ipynb} einsehbar.
+Durch Sampling ermöglicht MCMC das Berechnen statistischer Modelle mit einer hohen Anzahl an Parametern. Eine analytische Herangehensweise ist bereits ab wenigen Parametern nicht mehr sinnvoll, da hierfür die Bestimmung eines multidimensionalen Integrals erforderlich wäre. TFP bietet mehrere MCMC Algorithmen unter \textbf{tfp.mcmc} an. 
+
+Listing \ref{lst:mcmc} zeigt einen Ausschnitt der Verwendung des Hamiltonian Monte Carlo Algorithmus. Die hier nicht enthaltene Auswertung würde in einer approximierten Verteilung des Parameters \textit{tau} für das gegebene Modell \textit{\_data\_model} resultieren. Ein praxisbezogenes und ausführlicheres Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/mcmc.ipynb} einsehbar.
 
 \begin{lstlisting}[language=Python, caption={Verwendung des Hamiltonian Monte Carlo Algorithmus (gekürzt)}, label={lst:mcmc}]
 # Set the chain's start state.
@@ -244,13 +240,21 @@ Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der
 
 % TODO VI und Optimierungsverfahren kurz erklären
 
-\section{Pragmatik und Semantik}
+\section{Semantik und Projektaufbau}
 
-\section{Integration in Tensorflow}
+\subsection{Integration in Tensorflow}
+
+\subsection{Fehlerbehandlung}
+
+\subsection{Dokumentation}
+TFPs offizielle Dokumentation bietet neben der Beschreibung der API eine Auflistung an Beispielen und weiterführenden Ressourcen. Die, als Einführung anzusehende und kürzlich nach TFP portierte, Version von \textit{Bayesian Methods for Hackers: Probabilistic Programming and Bayesian Inference}\cite{Davidson-Pilon2015} stellte sich als besonders Hilfreich heraus.
+
+Die Bibliothek befindet sich in einem vergleichsweise frühem Stadium der Entwicklung und es gibt einen Hinweis, dass es zu Änderungen kommen kann. Teile der API sind entsprechend noch nicht vollständig dokumentiert (Stand März 2019).
+Undokumentierte Funktionen sind allerdings eher die Ausnahme als die Norm. Ein Großteil der in dieser Evaluation verwendeten Schnittstellen ließ sich anhand von Beispielen, genaueren Erläuterungen der Parameter oder durch Verweise auf relevante Literatur und Paper nachvollziehen.
 
 \section{Anwendungsgebiete}
-
-\section{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
+% Bei neuroalen Netzen: Loss ist Teil des Modells
+\subsection{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
 \label{sec:example_air_quality}
 
 Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar.
@@ -259,6 +263,8 @@ Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.co
 
 \section{Fazit}
 
+% Alter des Projekts 
+% Alternativen nennen
 
 %----------------------------------------------------------------------------------------
 %	Bibliography
@@ -266,8 +272,10 @@ Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.co
 \newpage
 
 \typeout{===== Section: literature}
-%\bibliography{bibs/bibs}
+\bibliography{bibs/bibs}
 
+\listoffigures
+\lstlistoflistings
 
 \end{document}
 
