@@ -257,14 +257,40 @@ Undokumentierte Funktionen sind allerdings eher die Ausnahme als die Norm. Ein G
 \subsection{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
 \label{sec:example_air_quality}
 
-Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar.
+Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar. Die Daten stammen aus dem \textit{UC Irvine Machine Learning Repository}\footnote{\url{https://archive.ics.uci.edu/ml/datasets/Air+quality}}.
 
+Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer stark befahrenen Straße verschiedenste Wetterdaten wie Temperatur, Luftfeuchtigkeit oder auch Stickstoffdioxid ($NO_2$) stündlich gemessen. Die Daten für Temperatur, relativer Luftfeuchtigkeit und $NO_2$ sind aggregiert in den Abbildungen \ref{fig:temp}, \ref{fig:rh} und \ref{fig:no2} visualisiert. Die blaue Linie stellt den gemittelten Wert um 00:00 Uhr Nachts und die grüne Linie um 12:00 Mittags dar.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./figs/temp.png}
+    \caption{Temperatur in $^\circ\text{C}$}
+    \label{fig:temp}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./figs/rh.png}
+    \caption{Relative Luftfeuchtigkeit in \%}
+    \label{fig:rh}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./figs/no2.png}
+    \caption{Stickstoffdioxid $NO_2$ in ${\mu g/m^3}$}
+    \label{fig:no2}
+\end{figure}
+
+In Europa ist der Grenzwert von $NO_2$ gesetzlich auf max $200{\mu g/m^3}$ festgelegt. Die EU-Richtlinie 2008/50/EG verschärfte dieses Gesetz insofern, dass der Jahresmittel $40{\mu g/m^3}$ nicht überschreiten darf. In diesem Beispiel soll ein probabilistisches Modell für Aussagen über die Korrelation zwischen Temperatur und Luftverschmutzung auf Basis eines neuronalen Netzes in TFP erstellt werden. Da bei probabilistischen Modellen \textit{loss} mit modelliert werden kann, wird nicht nur die Relation der Daten, sondern auch die Aussagekraft des jeweiligen ermittelten Wertes, zum Beispiel über dessen Standardabweichung, verdeutlicht.
 
 \section{Fazit}
 
 % Alter des Projekts 
-% Alternativen nennen
+
+% TODO weiter ausführen
+Eine alternative Bibliothek für probabilistische Programmierung, anstelle von TFP, ist \textit{PyMC3}\footnote{\url{https://docs.pymc.io/}}.
+
 
 %----------------------------------------------------------------------------------------
 %	Bibliography
