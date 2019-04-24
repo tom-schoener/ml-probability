@@ -47,7 +47,7 @@
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
-    basicstyle=\footnotesize,
+    basicstyle=\scriptsize,
     breakatwhitespace=false,         
     breaklines=true,                 
     captionpos=b,                    
@@ -240,9 +240,7 @@ Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der
 
 % TODO VI und Optimierungsverfahren kurz erklären
 
-\section{Semantik und Projektaufbau}
-
-\subsection{Integration in Tensorflow}
+\section{Semantik und Projektarchitektur}
 
 \subsection{Fehlerbehandlung}
 
@@ -259,7 +257,7 @@ Undokumentierte Funktionen sind allerdings eher die Ausnahme als die Norm. Ein G
 
 Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar. Die Daten stammen aus dem \textit{UC Irvine Machine Learning Repository}\footnote{\url{https://archive.ics.uci.edu/ml/datasets/Air+quality}}.
 
-Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer stark befahrenen Straße verschiedenste Wetterdaten wie Temperatur, Luftfeuchtigkeit oder auch Stickstoffdioxid ($NO_2$) stündlich gemessen. Die Daten für Temperatur, relativer Luftfeuchtigkeit und $NO_2$ sind aggregiert in den Abbildungen \ref{fig:temp}, \ref{fig:rh} und \ref{fig:no2} visualisiert. Die blaue Linie stellt den gemittelten Wert um 00:00 Uhr Nachts und die grüne Linie um 12:00 Mittags dar.
+Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer stark befahrenen Straße verschiedene Wetterdaten wie Temperatur, Luftfeuchtigkeit oder auch Stickstoffdioxid ($NO_2$) stündlich gemessen. Die Daten für Temperatur, relativer Luftfeuchtigkeit und $NO_2$ sind aggregiert in den Abbildungen \ref{fig:temp}, \ref{fig:rh} und \ref{fig:no2} visualisiert. Die blaue Linie stellt den gemittelten Wert um 00:00 Uhr Nachts und die orangene Linie um 12:00 Mittags dar.
 
 \begin{figure}[h]
     \centering
@@ -282,14 +280,115 @@ Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer s
     \label{fig:no2}
 \end{figure}
 
-In Europa ist der Grenzwert von $NO_2$ gesetzlich auf max $200{\mu g/m^3}$ festgelegt. Die EU-Richtlinie 2008/50/EG verschärfte dieses Gesetz insofern, dass der Jahresmittel $40{\mu g/m^3}$ nicht überschreiten darf. In diesem Beispiel soll ein probabilistisches Modell für Aussagen über die Korrelation zwischen Temperatur und Luftverschmutzung auf Basis eines neuronalen Netzes in TFP erstellt werden. Da bei probabilistischen Modellen \textit{loss} mit modelliert werden kann, wird nicht nur die Relation der Daten, sondern auch die Aussagekraft des jeweiligen ermittelten Wertes, zum Beispiel über dessen Standardabweichung, verdeutlicht.
+In Europa ist der Grenzwert von $NO_2$ gesetzlich auf max $200{\mu g/m^3}$ festgelegt. Die EU-Richtlinie 2008/50/EG verschärfte dieses Gesetz insofern, dass das Jahresmittel $40{\mu g/m^3}$ nicht überschreiten darf. In diesem Beispiel soll ein probabilistisches Modell für Aussagen über die Korrelation zwischen Temperatur und Luftverschmutzung auf Basis eines neuronalen Netzes in TFP erstellt werden. Da bei probabilistischen Modellen Verlust (\textit{loss}) mit modelliert werden kann, wird nicht nur die Relation der Daten, sondern auch die Aussagekraft des jeweiligen ermittelten Wertes, zum Beispiel über dessen Standardabweichung, verdeutlicht.
+
+\subsubsection{Modellierung ohne Unsicherheit}
+\label{sec:no_unc}
+
+Um das Modell erstellen zu können, müssen die Daten zunächst bereinigt werden. Null- oder fehlende Werte werden der Einfachheit halber interpoliert. In Listing \ref{lst:model_no_uncertainty} ist das Erstellen eines einfachen linearen Modells mit TFP und Keras zu sehen. Das Modell besteht aus zwei Schichten: Einem \textit{dense layer} mit einem eindimensionalen Output-Vektor und eine durch eine Normalverteilung beschriebene Schicht, deren Input-Vektor durch den Output-Vektor des \textit{dense layers} befüllt wird. Die Normalverteilung benutzt seinen Input, um den Mittelwert zu bestimmen. Beim Trainieren des Modells wird der Verlust (\textit{loss}) durch die Funktion \textit{neg\_log\_lik}, daher dem negativen Logarithmus einer Probe der aktuell bestimmten Verteilung, festgelegt. Es sollte auffallen, dass die Standardabweichung konstant bei 1 liegt, wodurch das resultierende Modell ebenfalls eine konstante Standardabweichung für jede Temperatur aufweisen wird. Abschnitt \ref{sec:with_unc} erweitert das Modell um diesen Aspekt.
+
+\begin{lstlisting}[language=Python, caption={Modell mit Keras ohne Unsicherheit}, label={lst:model_no_uncertainty}]
+def model_no_uncertainty(feature, label, epochs=100):
+  # feature
+  x = np.array(df[feature])
+  x = x[..., np.newaxis]
+
+  # label
+  y = np.array(df[label])
+  
+  # model
+  model = tf.keras.Sequential([
+    tf.keras.layers.Dense(1),
+    tfp.layers.DistributionLambda(lambda t: tfd.Normal(loc=t, scale=1)),
+  ])
+
+  # inference
+  neg_log_lik = lambda y_, rv_y: -rv_y.log_prob(y_)
+  model.compile(optimizer=tf.optimizers.Adam(learning_rate=0.01), loss=neg_log_lik)
+  model.fit(x, y, epochs=epochs)
+  
+  return (x, y, model)
+\end{lstlisting}
+
+Verwendet man dieses Modell, um anhand der Temperatur eine Prognose für jeweils die Luftfeuchtigkeit und den Stickstoffgehalt in der Luft zu bestimmen ergeben sich Abbildung \ref{fig:no_unc_rh} und \ref{fig:no_unc_no2}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./figs/no_unc_rh.png}
+    \caption{Prognose der relativen Luftfeuchtigkeit}
+    \label{fig:no_unc_rh}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./figs/no_unc_no2.png}
+    \caption{Prognose des Stickstoffgehalts in der Luft}
+    \label{fig:no_unc_no2}
+\end{figure}
+
+
+\subsubsection{Modellierung mit Unsicherheit}
+\label{sec:with_unc}
+
+Betrachtet man sich Abbildung \ref{fig:no_unc_rh} fällt auf, dass die Unsicherheit des hier linearen Ansatzes bei geringen Temperaturen stark zunimmt. Mit anderen Worten: Die Genauigkeit lässt nach. Das Modell kann dieses Problem aber noch nicht repräsentieren, daher wird im folgenden, verbesserten Modell die Unsicherheit mit integriert. Listing \ref{lst:model_with_uncertainty} beschreibt die Änderung. Der Aufbau ist dem ersten sehr ähnlich und unterscheidet sich im Wesentlichen nur in zwei Aspekten: 
+
+\begin{itemize}
+  \item Die erste Schicht hat einen zweidimensionalen Output-Vektor, um die Unsicherheit mit darzustellen.
+  \item Die zweite Schicht verwenden den zweiten Wert des Vektors, um seine Standardabweichung zu definieren. 
+\end{itemize}
+
+
+
+\begin{lstlisting}[language=Python, caption={Modell mit Keras mit Unsicherheit}, label={lst:model_with_uncertainty}]
+def model_with_uncertainty(feature, label, epochs=5000):
+  # feature
+  x = np.array(df[feature])
+  x = x[..., np.newaxis]
+
+  # label
+  y = np.array(df[label])
+  
+  model = tf.keras.Sequential([
+    tf.keras.layers.Dense(2),
+    tfp.layers.DistributionLambda(lambda t: tfd.Normal(
+        loc=t[..., :1],
+        scale=1e-3 + tf.math.softplus(5e-3 * t[...,1:])))
+  ])
+
+  # inference
+  negloglik = lambda y_, rv_y: -rv_y.log_prob(y_)
+  model.compile(optimizer=tf.compat.v2.optimizers.Adam(learning_rate=0.01), loss=negloglik)
+  model.fit(x, y, epochs=epochs);
+
+  return (x, y, model)
+\end{lstlisting}
+
+Das Ergebnis lässt sich in den Abbildungen \ref{fig:with_unc_rh} und \ref{fig:with_unc_no2} ablesen. Die Standardabweichung ist nun Teil des Modells. Auffällig ist hier, dass die Prognose der Unsicherheit des Stickstoffgehalts die Daten nicht sehr genau abbilden. Das kann mehrere Gründe haben. Hier wurde nur ein einfaches lineares Modell für Demonstrationszwecke verwendet. Einige der Hyperparameter könnten weiter angepasst werden und die Trainingszeit oder Datenmenge ist nicht unbedingt ausreichend. Natürlich kann es auch sein, dass die Temperatur kein sinnvoller Maßstab für den Stickstoffgehalt in der Luft ist, wodurch das Modell keine große Aussagekraft besitzt. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./figs/with_unc_rh.png}
+    \caption{Prognose der relativen Luftfeuchtigkeit mit variabler Standardabweichung}
+    \label{fig:with_unc_rh}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./figs/with_unc_no2.png}
+    \caption{Prognose des Stickstoffgehalts in der Luft mit variabler Standardabweichung}
+    \label{fig:with_unc_no2}
+\end{figure}
+
 
 \section{Fazit}
 
-% Alter des Projekts 
+Die Bibliothek TFP ist eine praktische Erweiterung des Tensorflow Frameworks, um sein Modell um eine statistische Ebene zu erweitern. Die bereitgestellten Funktionen sind sinnvoll aufgeteilt und es sind im Normalfall Beispiele vorhanden. Auch beim Release von Tensorflow 2.0 wurden Anpassungen an TFP vorgenommen, was das Interesse von Google und der OpenSource Community an der Weiterentwicklung von TFP zeigt. 
 
-% TODO weiter ausführen
-Eine alternative Bibliothek für probabilistische Programmierung, anstelle von TFP, ist \textit{PyMC3}\footnote{\url{https://docs.pymc.io/}}.
+Die Einarbeitungszeit ist, auch unter Ansicht der Komplexität des Themengebietes, nicht zu Vernachlässigen. Ein Beispiel hiervon sind \textit{Dataflow Graphs}. \textit{Dataflow Graphs} von Tensorflow ermöglichen ein effizientes Berechnungsmodell, welches auf GPUs und auf neuere spezialisierte Hardware wie TPUs ausgelegt ist. Einfache Anwendungsfälle profitieren aber nicht unbedingt von der Abstraktionsebene von Tensorflow. Eine alternative und bekannte Bibliothek für probabilistische Programmierung in Python, anstelle von TFP, ist beispielsweise \textit{PyMC3}\footnote{\url{https://docs.pymc.io/}}.
+
+Die Integration in Keras ist einer der nennenswertesten Stärken von TFP, da hierdurch die Komplexität an der richtigen Stelle gelockert wird. Probabilistische Modelle zu Erstellen wird hierdurch nicht trivial, aber deutlich zugänglicher. Ein fundamentales Wissen über die Domäne und das breite Gebiet der Statistik ist immer noch erforderlich. 
+
+Besonders für maschinelles Lernen eignet sich der Einsatz von TFP daher gut, da es sich in das bestehende Framework mit einreiht.
 
 
 %----------------------------------------------------------------------------------------
