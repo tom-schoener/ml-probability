@@ -153,7 +153,7 @@ Prof. Dr. Olaf Zukunft
 
 \section{Abstract}
 \label{abstract}
-Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} - fortan mit \textit{TFP} abgekürzt - erweitert das Framework um eine probabilistische Komponente.
+Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} v0.7.0 - fortan mit \textit{TFP} abgekürzt - erweitert das Framework um eine probabilistische Komponente.
 Mittels einer breiten Masse an bereitgestellten Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Erweiterungen für neronale Netze, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von TFP wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
 
 In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effektivität beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Das maschinelle Lernen mit Hilfe von neuronalen Netzen und deren Abstraktion durch Keras ist hierbei als Schwerpunkt anzusehen.
@@ -236,13 +236,16 @@ def joint_log_prob(_data_model, tau):
 )
 \end{lstlisting}
 
-Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der in der Literatur verwendeten Sprache, wodurch die Übertragung von Konzepten aus unterschiedlichen Quellen deutlich vereinfacht wird. 
+Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der in der Literatur verwendeten Sprache, wodurch sich Methoden anderer Quellen relativ problemlos übertragen lassen. 
 
-% TODO VI und Optimierungsverfahren kurz erklären
+Zu den Optimierungsverfahren von TFP gehören verschiedenste Algorithmen. Ohne an dieser Stelle zu sehr ins Detail zu gehen gibt es beispielsweise unter \textbf{tfp.optimizer.bfgs\_minimize}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer/bfgs_minimize}} einen \textit{Optimzer}\cite{Nocedal2006}, welcher einen Tiefpunkt einer differenzierbaren Funktion approximativ ermittelt. 
+
+Die von TFP bereitgestellten Funktionen für \textit{Variational Inference} habe ich für diese Evaluation nicht weiter verfolgt.
 
 \section{Semantik und Projektarchitektur}
 
 \subsection{Fehlerbehandlung}
+Ein nicht zu vernachlässigender Teil der Softwareentwicklung ist das Erkennen, Interpretieren und Beheben von semantischen Fehlern. Als Teil von Tensorflow gibt TFP bereits sinnvolle und leserliche Fehlermeldungen aus. Zum Beispiel wird bei falschen Typen eines Tensors folgende Fehlermeldung mit Stacktrace zurückgegeben: \textit{ValueError: Can't convert Python sequence with mixed types to Tensor}. Auf fehlende, nicht optionale Parameter wird ebenfalls hingewiesen. Befindet man sich nicht im Eager-Execution Modus, findet bereits beim Erstellen des Graphen und somit vor dessen Evaluation ein solches Typechecking statt. 
 
 \subsection{Dokumentation}
 TFPs offizielle Dokumentation bietet neben der Beschreibung der API eine Auflistung an Beispielen und weiterführenden Ressourcen. Die, als Einführung anzusehende und kürzlich nach TFP portierte, Version von \textit{Bayesian Methods for Hackers: Probabilistic Programming and Bayesian Inference}\cite{Davidson-Pilon2015} stellte sich als besonders Hilfreich heraus.
@@ -251,7 +254,7 @@ Die Bibliothek befindet sich in einem vergleichsweise frühem Stadium der Entwic
 Undokumentierte Funktionen sind allerdings eher die Ausnahme als die Norm. Ein Großteil der in dieser Evaluation verwendeten Schnittstellen ließ sich anhand von Beispielen, genaueren Erläuterungen der Parameter oder durch Verweise auf relevante Literatur und Paper nachvollziehen.
 
 \section{Anwendungsgebiete}
-% Bei neuroalen Netzen: Loss ist Teil des Modells
+
 \subsection{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
 \label{sec:example_air_quality}
 
@@ -389,6 +392,16 @@ Die Einarbeitungszeit ist, auch unter Ansicht der Komplexität des Themengebiete
 Die Integration in Keras ist einer der nennenswertesten Stärken von TFP, da hierdurch die Komplexität an der richtigen Stelle gelockert wird. Probabilistische Modelle zu Erstellen wird hierdurch nicht trivial, aber deutlich zugänglicher. Ein fundamentales Wissen über die Domäne und das breite Gebiet der Statistik ist immer noch erforderlich. 
 
 Besonders für maschinelles Lernen eignet sich der Einsatz von TFP daher gut, da es sich in das bestehende Framework mit einreiht.
+
+
+\section{Materialien}
+
+An dieser Stelle möchte ich eine Auswahl an hilfreichen Materialien zum Thema \textit{bayesian programming} aufführen, welche mir bei der Recherche positiv aufgefallen sind:
+\begin{itemize}
+  \item Jährliche Konferenz über Baysian Deep Learning (NIPS) \url{http://bayesiandeeplearning.org/}
+  \item Machine Learining: A Probabilistic Perspective (Kevin P. Murphy)\cite{Murphy2012}
+  \item Präsentation über Tensorflow Probability des Entwicklers Josh Dillon \url{https://youtu.be/GqxmRKplj4w} (Folien: \url{https://docs.google.com/presentation/d/1BWhNVHzhFfYiFL8ynX1wFmag8YjzvHeqKkd8Z0G8H7Y/edit#slide=id.g3f2acb32c4_0_0})
+\end{itemize}
 
 
 %----------------------------------------------------------------------------------------
