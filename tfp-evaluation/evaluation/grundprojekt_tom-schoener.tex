@@ -153,7 +153,7 @@ Prof. Dr. Olaf Zukunft
 
 \section{Abstract}
 \label{abstract}
-Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} v0.7.0 - fortan mit \textit{TFP} abgekürzt - erweitert das Framework um eine probabilistische Komponente.
+Die auf Tensorflow basierende Bibliothek Tensorflow Probability\footnote{\url{https://www.tensorflow.org/probability}} v0.7.0 --- fortan mit \textit{TFP} abgekürzt --- erweitert das Framework um eine probabilistische Komponente.
 Mittels einer breiten Masse an bereitgestellten Tools, wie statistischen Verteilungen, Sampling oder verschiedenster probabilistischer Erweiterungen für neronale Netze, können einfache bis hin zu komplexen Modellen erstellt werden. Berechnungen werden, wie man es aus Tensorflow gewohnt ist, durch \textit{Dataflow Graphs}\footnote{\url{https://www.tensorflow.org/guide/graphs}} abgebildet. Auf die verschiedenen Funktionsweisen und Schichten von TFP wird in Abschnitt \ref{sec:tfp-components} detaillierter eingegangen.
 
 In dieser Evaluation soll die Bibliothek auf ihre Semantik und Pragmatik, Effektivität beim Erstellen von statistischen Modellen und Integration in das Framework Tensorflow untersucht werden. Das maschinelle Lernen mit Hilfe von neuronalen Netzen und deren Abstraktion durch Keras ist hierbei als Schwerpunkt anzusehen.
@@ -175,8 +175,8 @@ Verschiedenste, für probabilistische Modelle essentielle Verteilungen reihen si
 normal_dist = tfd.Normal(name="N", loc=0., scale=1.)
 # tfp.distributions.Normal("N/", batch_shape=(), event_shape=(), dtype=float32)
 
-sample = normal_dist.sample(sample_shape=normal_sample_size)
-# <tf.Tensor: id=188, shape=(2500,), dtype=float32, numpy=array([-0.45733708, -0.19126031, -0.33290815, ..., -1.1285563 , -0.6958163 ,  0.552399  ], dtype=float32)>
+sample = normal_dist.sample(sample_shape=25000)
+# <tf.Tensor: id=188, shape=(25000,), dtype=float32, numpy=array([-0.45733708, -0.19126031, -0.33290815, ..., -1.1285563 , -0.6958163 ,  0.552399  ], dtype=float32)>
 
 normal_dist.mean() 
 # tf.Tensor(0.0, shape=(), dtype=float32)
@@ -185,18 +185,38 @@ normal_dist.prob(1.0)
 # tf.Tensor(0.24197072, shape=(), dtype=float32)
 \end{lstlisting}
 
-\textit{Broadcasting, Batching} und \textit{Shapes} sorgen dafür, dass unabhängige Verteilungen als sogenannter Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. Da TFP hier ebenfalls broadcasting unterstützt müssen die folgenden Aufrufe nicht angepasst werden, nur das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
-
-% TODO auf event shapes eingehen
-% Trainable Distributions
-// TODO Event shapes
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{./figs/normal-dist.png}
-    \caption{$X \sim \mathcal{N}(0,\, 1)$ mit 2500 Samples}
+    \caption{$X \sim \mathcal{N}(0,\, 1)$ mit 25000 Samples}
     \label{fig:normal_dist}
 \end{figure}
+
+% Shapes
+\textit{Broadcasting, batching} und \textit{shapes} sorgen dafür, dass unabhängige Verteilungen als sogenannter Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. TFP unterstützt broadcasting, somit müssen die folgenden Aufrufe nicht angepasst werden. Das Ergebnis wird Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
+
+Die Shapes lassen sich nochmals in drei Kategorien unterteilen, Tabelle \ref{table:shapes} verdeutlicht diese an einem Beispiel:
+\begin{itemize}
+  \item \textit{event shape}: Beschreibt die Form einer Stichprobe aus einer Verteilung, abhängig von seiner Dimension. Skalare Verteilungen besitzen die Form [], multivariate Verteilungen zum Beispiel die Form [3].
+  \item \textit{batch shape}: Beschreibt die Form unabhängiger, nicht identisch verteilter Stichproben.
+  \item \textit{sample shape}: Beschreibt die Form unabhängiger, aber identisch verteilter Stichproben aus \textit{batches} der Verteilung(en).
+\end{itemize}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+sample shape  & Ergebnis        \\ \hline
+1             & (1, 2, 3)       \\ \hline
+2             & (2, 2, 3)       \\ \hline
+{[}1, 5{]}    & (1, 5, 2, 3)    \\ \hline
+{[}3, 4, 5{]} & (3, 4, 5, 2, 3) \\ \hline
+\end{tabular}
+\caption{Auswirkung der verschiedenen Formen einem batch shape von [2] und einem event shape von [3]}
+\label{table:shapes}
+\end{table}
+
 
 Ein weiterer Bestandteil von Schicht 1 sind \textit{Bijectors}. Bijectors bilden eine Zahl aus $\mathbb{R}^n$ auf $\mathbb{R}^m$ ab oder jeweils einer Submenge dieser. Aufgrund der im Bijector hinterlegten bijektiven Funktion ist dieser Schritt umkehrbar, daher: $x = f^{-1}(f(x))$. Dies ist besonders bei der Transformierung von Stichproben aus Verteilungen nützlich und wird folglich für das Erstellen von Modellen (Abschnitt \ref{sec:layer2}) und Berechnungen probabilistischer Interferenzen (Abschnitt \ref{sec:layer3}) eingesetzt. TFP bietet bereits einige vorgefertigte Bijectors unter \textbf{tfp.bijectors}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors}} an. 
 
@@ -233,8 +253,7 @@ encoder = tfk.Sequential([
 \end{lstlisting}
 
 % Trainable Distributions
-// TODO Trainable Distributions
-
+% TODO Trainable Distributions
 
 % Edward
 Ein weiterer Bestandteil ist die probabilistische Programmiersprache Edward2\footnote{\url{https://github.com/tensorflow/probability/tree/master/tensorflow_probability/python/edward2}}.
@@ -373,8 +392,6 @@ Betrachtet man sich Abbildung \ref{fig:no_unc_rh} fällt auf, dass die Unsicherh
   \item Die erste Schicht hat einen zweidimensionalen Output-Vektor, um die Unsicherheit mit darzustellen.
   \item Die zweite Schicht verwenden den zweiten Wert des Vektors, um seine Standardabweichung zu definieren. 
 \end{itemize}
-
-
 
 \begin{lstlisting}[language=Python, caption={Modell mit Keras mit Unsicherheit}, label={lst:model_with_uncertainty}]
 def model_with_uncertainty(feature, label, epochs=5000):
