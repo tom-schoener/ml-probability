@@ -166,7 +166,7 @@ Die Struktur von TFP lässt sich, wie aus der Dokumentation zu entnehmen ist\foo
 TFP ist nicht als eigenständige Komponente neben Tensorflow anzusehen, sondern als Bestandteil dessen. Die probabilistischen Berechnungen werden innerhalb von Tensorflow Sessions oder im \textit{Eager}-Modus ausgeführt. Tensorflow wird von mehreren Programmiersprachen wie Python, JavaScript oder C++ unterstützt. Die Bibliothek TFP ist aktuell nur für die primär unterstützte Programmiersprache Python implementiert.
 
 \subsection{Schicht 1: Statistical Building Blocks}
-
+\label{sec:buildingblocks}
 Als Fundament statistischer Modelle sind mehrere, in Python Module aufgeteilte, Klassen und Funktionen gegeben. Diese können in der API Dokumentation der TFP Website eingesehen werden. Ein Beispiel hierfür ist das Modul \textbf{fp.stats}. Unter \textbf{fp.stats} finden sich unter Anderem Funktionen für die Berechnung für Korrelationen, Quantilen oder Standardabweichungen. Diese Funktionen sind auf die Verwendung von Tensoren ausgelegt, lassen sich aber generell auch mit normalen n-dimensionalen Python Arrays oder Numpy Arrays aufrufen.  
 
 Verschiedenste, für probabilistische Modelle essentielle Verteilungen reihen sich unter dem Modul \textbf{tfp.distributions} in dieser Schicht ein: \textit{Normal-, Bernoulli-, Exponential- oder Gammaverteilung}, um einige zu nennen. Generell erben Klassen für Verteilungen, wie etwa die Normalverteilung, von der Klasse \textbf{tfp.distributions.Distribution}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution}}. Diese gemeinsame Schnittstelle standardisiert die Benutzung. Sie fordert zudem Implementationen mehrerer hilfreicher Methoden wie etwa für die logarithmische Wahrscheinlichkeit oder dem Mittelwert. Am Beispiel der Normalverteilung mit der Definition $X \sim \mathcal{N}(\mu,\,\sigma^{2})$ sind im Folgenden einige der Funktionen aufgeführt (siehe Listing \ref{lst:normal}). Visualisiert man die Verteilung auf Basis der Samples \textit{sample} (Zeile 4) ergibt sich Abbildung \ref{fig:normal_dist}.
@@ -227,12 +227,9 @@ Ein weiterer Bestandteil von Schicht 1 sind \textit{Bijectors}. Bijectors bilden
 % Probabilistic Layers (with Keras)
 Keras ist eine modulare high-level API für die Erstellung und Komposition neuronaler Netze. TFP erweitert das Angebot an Keras-kompatiblen Komponenten durch einige probabilistische Schichten in \textbf{tfp.layers}. Die Architektur orientiert sich weiterhin am selben Keras Model\footnote{\url{https://keras.io/getting-started/sequential-model-guide/}}. Neben vorgefertigten Schichten wie \textbf{tfp.layers.IndependentNormal} lassen sich durch die Klasse \textbf{tfp.layers.DistributionLambda} alle Verteilungen, welche von \textbf{tfp.distributions.Distribution} erben, in die Sequenz einbinden. Keras für Tensorflow erlaubt nur konkrete Tensoren und keine generischen Verteilungen, daher muss   die jeweilige Schicht wissen, wie sie ihren Ausgabevektor definieren soll. Dies geschieht mittels des übergebenen Parameters \textit{convert\_to\_tensor\_fn}, welcher standardmäßig durch die \textit{sample} Funktion repräsentiert wird. Hierdurch ist eine konfigurierbare Transformation in einen konkreten Tensor gewährleistet.
 
-Die Einbindung von probabilistischen Schichten in Keras ist nicht immer trivial, da sie nicht ganz der traditionellen Herangehensweise mit Keras entspricht. Es ist wichtig, sich über die Form des Ein- und Ausgabevektors Gedanken zu machen. In Abschnitt \ref{sec:example_air_quality} wird die Verwendung und der Umgang mit Ein- und Ausgabevektoren von probabilistischen Schichten in Keras anhand eines Beispiels verdeutlicht.
+Die Einbindung von probabilistischen Schichten in Keras ist Anfangs noch ungewohnt, da sie nicht ganz der herkömmlichen Herangehensweise entspricht. Für ein funktionierendes Modell müssen die internen Ein- und Ausgabevektors untereinander Kompatibel sein. Sobald das Modell mit \textit{compile()} und \textit{train()} kompiliert und trainiert wurde, können Prognosen mit neuen Daten vorgenommen werden. Die Prognose liefert praktischer Weise direkt eine Wahrscheinlichkeitsverteilung zurück, dessen batch shape (siehe Abschnitt \ref{sec:buildingblocks}) an die Form der neuen Daten angepasst ist. Haben die neuen Daten die Form [100], so ergibt sich für die Verteilung beispielsweise ein batch shape von [100, 1] und repräsentiert somit 100 unabhängige, nicht zwangsläufig gleich verteilte Stichproben. Die über das Training ermittelten Gewichte der Eingabevektoren solcher probabilistischen Schichten lassen sich als Parameter der Verteilung interpretieren, natürlich abhängig von der genauen Implementierung.
 
-% TODO: genauere Erläuterung der Interaktionen
-% TODO: Resultat des Models erläutern
-
-Listing \ref{lst:tfp.layers.IndependentNormal} zeigt die Verwendung von verschiedenen probabilistischen und nicht probabilistischen Keras Schichten. Das Beispiel ist der Dokumentation\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/layers/IndependentNormal}} entnommen. 
+Die Interpretation der Gewichte sowie die Verwendung und der Umgang mit Ein- und Ausgabevektoren von probabilistischen Schichten in Keras wird in Abschnitt \ref{sec:example_air_quality} anhand eines Beispiels verdeutlicht. Listing \ref{lst:tfp.layers.IndependentNormal} zeigt die Verwendung von verschiedenen probabilistischen und nicht probabilistischen Keras Schichten. Das Beispiel ist der Dokumentation\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/layers/IndependentNormal}} entnommen. 
 
 \begin{lstlisting}[language=Python, caption={Beispiel probabilistischer und nicht probabilistischer Keras Schichten}, label={lst:tfp.layers.IndependentNormal}]
 tfd = tfp.distributions
@@ -251,9 +248,6 @@ encoder = tfk.Sequential([
   tfpl.IndependentNormal(encoded_shape)
 ])
 \end{lstlisting}
-
-% Trainable Distributions ?
-% TODO Trainable Distributions
 
 % Edward
 Ein weiterer Bestandteil ist die probabilistische Programmiersprache Edward2\footnote{\url{https://github.com/tensorflow/probability/tree/master/tensorflow_probability/python/edward2}}.
