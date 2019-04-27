@@ -105,8 +105,8 @@
 
 \HRule \\[0.4cm]
 
-{ \large \bfseries Evaluation von TensorFlow Probability}\\[0.1cm]
-{ \large für statistische Analysen}\\[0cm]
+{ \large \bfseries Evaluation of TensorFlow Probability}\\[0.1cm]
+{ \large for enhanced machine learning}\\[0cm]
 
 \HRule \\[2.0cm]
 
@@ -194,9 +194,9 @@ normal_dist.prob(1.0)
 \end{figure}
 
 % Shapes
-\textit{Broadcasting, batching} und \textit{shapes} sorgen dafür, dass unabhängige Verteilungen als sogenannter Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. TFP unterstützt broadcasting, somit müssen die folgenden Aufrufe nicht angepasst werden. Das Ergebnis wird Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
+\textit{Broadcasting, batching} und \textit{shapes} sorgen dafür, dass unabhängige Verteilungen als sogenannter Batch in einer Entität  gekapselt werden können. Um beispielsweise ein zweidimensionales Batch für die Normalverteilung aus Listing \ref{lst:normal} zu erzeugen, kann als Erwartungswert $\mu$ \textit{loc=[0., 10.]} übergeben werden. TFP unterstützt broadcasting, somit müssen die folgenden Aufrufe nicht angepasst werden. Das Ergebnis wird ebenfalls Zweidimensional sein. Broadcasting verhält sich analog zu dem in Numpy etablierten Konzept\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}}.
 
-Die Shapes lassen sich nochmals in drei Kategorien unterteilen, Tabelle \ref{table:shapes} verdeutlicht diese an einem Beispiel:
+Die Shapes lassen sich nochmals in drei Kategorien unterteilen, Tabelle \ref{table:shapes} verdeutlicht diese an einem Beispiel.
 \begin{itemize}
   \item \textit{event shape}: Beschreibt die Form einer Stichprobe aus einer Verteilung, abhängig von seiner Dimension. Skalare Verteilungen besitzen die Form [], multivariate Verteilungen zum Beispiel die Form [3].
   \item \textit{batch shape}: Beschreibt die Form unabhängiger, nicht identisch verteilter Stichproben.
@@ -213,7 +213,7 @@ sample shape  & Ergebnis        \\ \hline
 {[}1, 5{]}    & (1, 5, 2, 3)    \\ \hline
 {[}3, 4, 5{]} & (3, 4, 5, 2, 3) \\ \hline
 \end{tabular}
-\caption{Auswirkung der verschiedenen Formen mit einem batch shape von [2] und einem event shape von [3]}
+\caption{Auswirkung der verschiedenen sample shapes mit einem batch shape von [2] und einem event shape von [3]}
 \label{table:shapes}
 \end{table}
 
@@ -225,7 +225,7 @@ Ein weiterer Bestandteil von Schicht 1 sind \textit{Bijectors}. Bijectors bilden
 \label{sec:layer2}
 
 % Probabilistic Layers (with Keras)
-Keras ist eine modulare high-level API für die Erstellung und Komposition neuronaler Netze. TFP erweitert das Angebot an Keras-kompatiblen Komponenten durch einige probabilistische Schichten in \textbf{tfp.layers}. Die Architektur orientiert sich weiterhin am selben Model\footnote{\url{https://keras.io/getting-started/sequential-model-guide/}}. Neben vorgefertigten Schichten wie \textbf{tfp.layers.IndependentNormal} lassen sich durch die Klasse \textbf{tfp.layers.DistributionLambda} alle Verteilungen, welche von \textbf{tfp.distributions.Distribution} erben, in die Sequenz einbinden. Keras für Tensorflow erlaubt nur konkrete Tensoren und keine generischen Verteilungen, daher muss   die jeweilige Schicht wissen, wie sie ihren Ausgabevektor definieren soll. Dies geschieht mittels des übergebenen Parameters \textit{convert\_to\_tensor\_fn}, welcher standardmäßig durch die \textit{sample} Funktion repräsentiert wird. Hierdurch ist eine konfigurierbare Transformation in einen konkreten Tensor gewährleistet.
+Keras ist eine modulare high-level API für die Erstellung und Komposition neuronaler Netze. TFP erweitert das Angebot an Keras-kompatiblen Komponenten durch einige probabilistische Schichten in \textbf{tfp.layers}. Die Architektur orientiert sich weiterhin am selben Keras Model\footnote{\url{https://keras.io/getting-started/sequential-model-guide/}}. Neben vorgefertigten Schichten wie \textbf{tfp.layers.IndependentNormal} lassen sich durch die Klasse \textbf{tfp.layers.DistributionLambda} alle Verteilungen, welche von \textbf{tfp.distributions.Distribution} erben, in die Sequenz einbinden. Keras für Tensorflow erlaubt nur konkrete Tensoren und keine generischen Verteilungen, daher muss   die jeweilige Schicht wissen, wie sie ihren Ausgabevektor definieren soll. Dies geschieht mittels des übergebenen Parameters \textit{convert\_to\_tensor\_fn}, welcher standardmäßig durch die \textit{sample} Funktion repräsentiert wird. Hierdurch ist eine konfigurierbare Transformation in einen konkreten Tensor gewährleistet.
 
 Die Einbindung von probabilistischen Schichten in Keras ist nicht immer trivial, da sie nicht ganz der traditionellen Herangehensweise mit Keras entspricht. Es ist wichtig, sich über die Form des Ein- und Ausgabevektors Gedanken zu machen. In Abschnitt \ref{sec:example_air_quality} wird die Verwendung und der Umgang mit Ein- und Ausgabevektoren von probabilistischen Schichten in Keras anhand eines Beispiels verdeutlicht.
 
@@ -291,9 +291,9 @@ def joint_log_prob(_data_model, tau):
 
 Die in der API verwendeten Bezeichnungen decken sich hier größtenteils mit der in der Literatur verwendeten Sprache, wodurch sich Methoden anderer Quellen relativ problemlos übertragen lassen. 
 
-Zu den Optimierungsverfahren von TFP gehören verschiedenste Algorithmen. Ohne an dieser Stelle zu sehr ins Detail zu gehen gibt es beispielsweise unter \textbf{tfp.optimizer.bfgs\_minimize}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer/bfgs_minimize}} einen \textit{Optimzer}\cite{Nocedal2006}, welcher einen Tiefpunkt einer differenzierbaren Funktion approximiert ermittelt. Vergleichbar sind diese Algorithmen mit dem bereits in Tensorflow enthaltenen Optimierungsverfahren\footnote{\url{https://www.tensorflow.org/versions/r2.0/api_docs/python/tf/optimizers}}.
+Zu den Optimierungsverfahren von TFP gehören verschiedenste Algorithmen. Ohne an dieser Stelle zu sehr ins Detail zu gehen, gibt es beispielsweise unter \textbf{tfp.optimizer.bfgs\_minimize}\footnote{\url{https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer/bfgs_minimize}} einen \textit{Optimzer}\cite{Nocedal2006}, welcher einen Tiefpunkt einer differenzierbaren Funktion approximiert ermittelt. Vergleichbar sind diese Algorithmen mit dem bereits in Tensorflow enthaltenen Optimierungsverfahren\footnote{\url{https://www.tensorflow.org/versions/r2.0/api_docs/python/tf/optimizers}}.
 
-\textit{Variational Inference} habe ich für diese Evaluation nicht weiter verfolgt.
+\textit{Variational Inference} in TFP habe ich für diese Evaluation nicht weiter untersucht.
 
 \section{Semantik und Projektarchitektur}
 
@@ -301,22 +301,21 @@ Zu den Optimierungsverfahren von TFP gehören verschiedenste Algorithmen. Ohne a
 Ein nicht zu vernachlässigender Teil der Softwareentwicklung ist das Erkennen, Interpretieren und Beheben von semantischen Fehlern. Als Teil von Tensorflow gibt TFP bereits sinnvolle und leserliche Fehlermeldungen aus. Zum Beispiel wird bei falschen Typen eines Tensors folgende Fehlermeldung mit Stacktrace zurückgegeben: \textit{ValueError: Can't convert Python sequence with mixed types to Tensor}. Auf fehlende, nicht optionale Parameter wird ebenfalls hingewiesen. Befindet man sich nicht im Eager-Execution Modus, findet bereits beim Erstellen des Graphen und somit vor dessen Evaluation ein solches Typechecking statt. 
 
 \subsection{Dokumentation}
-TFPs offizielle Dokumentation bietet neben der Beschreibung der API eine Auflistung an Beispielen und weiterführenden Ressourcen. Die, als Einführung anzusehende und kürzlich nach TFP portierte, Version von \textit{Bayesian Methods for Hackers: Probabilistic Programming and Bayesian Inference}\cite{Davidson-Pilon2015} stellte sich als besonders Hilfreich heraus.
+TFPs offizielle Dokumentation bietet neben der Beschreibung der API eine Auflistung an Beispielen und weiterführenden Ressourcen. Die als Einführung anzusehende und kürzlich nach TFP portierte Version von \textit{Bayesian Methods for Hackers: Probabilistic Programming and Bayesian Inference}\cite{Davidson-Pilon2015} stellte sich als besonders Hilfreich heraus.
 
-Die Bibliothek befindet sich in einem vergleichsweise frühem Stadium der Entwicklung. Es wird darauf hingewiesen, dass es in Zukunft zu Änderungen kommen kann. Teile der API sind entsprechend noch nicht vollständig dokumentiert (Stand März 2019).
+Die Bibliothek befindet sich in einem vergleichsweise frühen Stadium der Entwicklung. Es wird darauf hingewiesen, dass es in Zukunft zu Änderungen kommen kann. Teile der API sind entsprechend noch nicht vollständig dokumentiert (Stand März 2019).
 Undokumentierte Funktionen sind allerdings eher die Ausnahme als die Norm. Ein Großteil der in dieser Evaluation verwendeten Schnittstellen ließ sich anhand von Beispielen, genaueren Erläuterungen der Parameter oder durch Verweise auf relevante Literatur und Paper nachvollziehen. Einzig ein Überblick oder eine Einleitung der individuellen Module und deren Funktionsweise fehlt fast vollständig. Die Verwendung dieser Module wird dadurch nicht sofort ersichtlich und erschwert deren Benutzung. Häufig musste ich auf Beispiele oder externe Quellen zurückgreifen, um mir einen Überblick zu verschaffen.
 
 \section{Anwendungsgebiete}
 
-% TODO: Anwendungsgebiete
-// TODO Anwendungsgebiete
+Das Ziel maschinellen Lernens ist das Erkennen und Übertragen von Mustern. Reale Daten bringen allerdings immer eine gewisse Unsicherheit mit sich. Die Wahrscheinlichkeitstheorie wirkt diesem Problem, unter Anderem mit Hilfe der bayesschen Inferenz, entgegen. Prognosen lassen sich in Folge dessen auf mathematischer Grundlage einschätzen und verifizieren. Auch die (Hyper-)Parameter des Modells können als Zufallsvariable einer Wahrscheinlichkeitsverteilung dargestellt werden. Der probabilistische Ansatz schränkt die Anwendungsgebiete nicht ein, sondern bietet lediglich eine neue Sichtweise. Das folgende Beispiel soll diesen Vorteil und die Anwendung von TFP für probabilistische Modelle zeigen. In \textit{Machine Learning: A Probabilistic Perspective}\cite{Murphy2012} Kapitel 1.2.1.2 ff. (\textit{The need for probabilistic predictions}) werden weitere konkrete Beispiele wie die Klassifizierung von Blumen erläutert. 
 
 \subsection{Beispiel: Korrelation von Luftverschmutzung und Temperatur}
 \label{sec:example_air_quality}
 
 Das Jupyter Notebook für das folgende Beispiel ist unter \url{https://github.com/tom-schoener/ml-probability/blob/master/tfp-evaluation/notebooks/air_quality.ipynb} einsehbar. Die Daten stammen aus dem \textit{UC Irvine Machine Learning Repository}\footnote{\url{https://archive.ics.uci.edu/ml/datasets/Air+quality}}.
 
-Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer stark befahrenen Straße verschiedene Wetterdaten wie Temperatur, Luftfeuchtigkeit oder auch Stickstoffdioxidgehalt ($NO_2$) in der Luft stündlich gemessen. Die Daten für Temperatur, relativer Luftfeuchtigkeit und $NO_2$ sind aggregiert in den Abbildungen \ref{fig:temp}, \ref{fig:rh} und \ref{fig:no2} visualisiert. Die blaue Linie stellt den gemittelten Wert um 00:00 Uhr Nachts und die orangene Linie um 12:00 Mittags dar.
+Von März 2004 bis Februar 2005 wurden in einer italienischen Stadt nahe einer stark befahrenen Straße verschiedene Wetterdaten wie Temperatur, Luftfeuchtigkeit oder auch Stickstoffdioxidgehalt ($NO_2$) in der Luft stündlich gemessen. Die Daten für Temperatur, relativer Luftfeuchtigkeit und $NO_2$ sind aggregiert in den Abbildungen \ref{fig:temp}, \ref{fig:rh} und \ref{fig:no2} visualisiert. Die blaue Linie stellt den gemittelten Wert um 00:00Uhr Nachts und die orangene Linie um 12:00Uhr Mittags dar.
 
 \begin{figure}[h]
     \centering
@@ -422,7 +421,7 @@ def model_with_uncertainty(feature, label, epochs=5000):
 
 Das Ergebnis lässt sich in den Abbildungen \ref{fig:with_unc_rh} und \ref{fig:with_unc_no2} ablesen. Die Standardabweichung ist nun Teil des Modells. Akzeptiert man hier das lineare Modell, lässt sich für den Stickstoffgehalt in der Luft allgemein aussagen, dass die Prognosesicherheit mit steigenden Temperaturen sinkt und der Stickstoffgehalt in Luft interessanter Weise ebenfalls fällt. Am Modell der relativen Luftfeuchtigkeit  lässt sich durch das probabilistische Modell ablesen, dass bei steigenden Temperaturen die Genauigkeit der Prognosen stark zunimmt, was sich mit der Erwartungshaltung gegenüber der Relation von Temperatur und Luftfeuchtigkeit deckt.
 
-Auffällig ist hier, dass die Prognose der Unsicherheit des Stickstoffgehalts die Daten nicht sehr genau abbilden. Das kann mehrere Gründe haben. Hier wurde nur ein einfaches lineares Modell für Demonstrationszwecke verwendet. Einige der Hyperparameter könnten weiter angepasst werden und die Trainingszeit oder Datenmenge ist nicht unbedingt ausreichend. Natürlich kann es auch sein, dass die Temperatur kein sinnvoller Maßstab für den Stickstoffgehalt in der Luft ist, wodurch das Modell keine große Aussagekraft besitzt. 
+Auffällig ist hier, dass die Prognose der Unsicherheit des Stickstoffgehalts die Daten nicht sehr genau abbildet. Das kann mehrere Gründe haben. Hier wurde nur ein einfaches lineares Modell für Demonstrationszwecke verwendet. Einige der Hyperparameter könnten weiter angepasst werden und die Trainingszeit oder Datenmenge ist nicht unbedingt ausreichend. Natürlich kann es auch sein, dass die Temperatur kein sinnvoller Maßstab für den Stickstoffgehalt in der Luft ist, wodurch das Modell keine große Aussagekraft besitzt. 
 
 \begin{figure}[h]
     \centering
@@ -441,11 +440,11 @@ Auffällig ist hier, dass die Prognose der Unsicherheit des Stickstoffgehalts di
 
 \section{Fazit}
 
-Die Bibliothek TFP ist eine praktische Erweiterung des Tensorflow Frameworks, um sein Modell um eine statistische Ebene zu erweitern. Die bereitgestellten Funktionen sind sinnvoll aufgeteilt und es sind im Normalfall Beispiele für deren Verwendung vorhanden. Auch beim Release von Tensorflow 2.0 wurden Anpassungen an TFP vorgenommen, was das Interesse von Google und der OpenSource Community an der Weiterentwicklung von TFP zeigt. 
+Die Bibliothek TFP ist eine praktische Erweiterung des Tensorflow Frameworks, um sein Modell um eine probabilistische Ebene zu erweitern. Die bereitgestellten Funktionen sind sinnvoll aufgeteilt und es sind im Normalfall Beispiele für deren Verwendung vorhanden. Auch beim Release von Tensorflow 2.0 wurden Anpassungen an TFP vorgenommen, was das Interesse von Google und der OpenSource Community an der Weiterentwicklung von TFP zeigt. 
 
 Die Einarbeitungszeit ist, auch unter Ansicht der Komplexität des Themengebietes, nicht zu Vernachlässigen. Ein Beispiel hiervon sind \textit{Dataflow Graphs}. \textit{Dataflow Graphs} von Tensorflow ermöglichen ein effizientes Berechnungsmodell, welches auf GPUs und auf neuere spezialisierte Hardware wie TPUs ausgelegt ist. Einfache Anwendungsfälle profitieren aber nicht unbedingt von der Abstraktionsebene von Tensorflow. Eine alternative und bekannte Bibliothek für probabilistische Programmierung in Python, anstelle von TFP, ist beispielsweise \textit{PyMC3}\footnote{\url{https://docs.pymc.io/}}.
 
-Besonders im Hinblick auf maschinelles Lernen eignet sich der Einsatz von TFP. Es reiht sich relativ problemlos in das bestehende Framework ein. Die Integration in Keras ist einer der nennenswertesten Stärken von TFP, da hierdurch die Komplexität an der richtigen Stelle gelockert wird. Probabilistische Modelle zu Erstellen wird hierdurch nicht trivial, aber deutlich zugänglicher. Ein fundamentales Wissen über die Domäne und das breite Gebiet der Statistik ist natürlich immer noch erforderlich. 
+Besonders im Hinblick auf maschinelles Lernen eignet sich der Einsatz von TFP. Es reiht sich relativ problemlos in das bestehende Framework ein. Die Integration in Keras ist einer der nennenswertesten Stärken von TFP, da die Komplexität an der richtigen Stelle gelockert wird. Probabilistische Modelle zu Erstellen wird hierdurch nicht trivial, aber deutlich zugänglicher. Ein fundamentales Wissen über die Domäne und das breite Gebiet der der Wahrscheinlichkeitstheorie ist natürlich immer noch erforderlich. 
 
 \section{Materialien}
 
