@@ -1,6 +1,7 @@
 import os
 import re
 
+import nltk
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.datasets import imdb
@@ -9,17 +10,22 @@ keras = tf.keras
 
 def load_imdb():
     """
-    IMDB Dataset
+    Loads the IMDB dataset and stores it locally for later use.
     https://keras.io/datasets/#imdb-movie-reviews-sentiment-classification
     """
     INDEX_FROM = 0
 
     (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=INDEX_FROM)
-
     return ((x_train, y_train), (x_test, y_test))
 
 
 def load_imdb_word_index():
+    """
+    Loads the imbd word index. It uses the following special words at the beginning: 
+    0: <PAD> 
+    1: <START>
+    2: <UNK>
+    """
     word_index = imdb.get_word_index()
     word_index["<PAD>"] = 0
     word_index["<START>"] = 1
@@ -29,7 +35,13 @@ def load_imdb_word_index():
 
 def load_glove_embedding(glove_dir, embedding_dim=50, verbose=True):
     """
-    Pretrained Word Embedding
+    Loads the pretrained GloVe word embedding and returns it as a
+    dictonary.
+
+    Keyword arguments:
+    glove_dir       -- GloVe directory as an absolute path
+    embedding_dim   -- dimension of the GloVe word embedding. (default: 50) 
+    verbose         -- if False it won't log additional information (default: True)
     """
 
     embedding_index = {}
@@ -48,28 +60,70 @@ def load_glove_embedding(glove_dir, embedding_dim=50, verbose=True):
     return embedding_index
 
 
+def word_net_lemmatizer_fn():
+    """
+    Returns a function which lemmatizes a given word using the english language.
+
+    Note: Requires the wordnet corpus. To download the corpus execute the following 
+    python script: nltk.download()
+    """
+
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+
+    def fn(word):
+        word = re.sub(r'\W', '', word)
+        return lemmatizer.lemmatize(word)
+    return fn
+
+
 class WordIndex:
+    """
+    Utility class to handle the imdb word index.
+    """
+
     def __init__(self, word_index=load_imdb_word_index()):
         self.index = word_index
         self.index_inverse = {v: k for k, v in self.index.items()}
 
     def vec2sentence(self, vec):
+        """
+        Converts a word vector representation into its sentence counterpart.
+
+        Keyword arguments:
+        vec -- word vector
+        """
         sentence = map(lambda i: self.index_inverse[i], vec)
         return " ".join(sentence)
 
     def sentence2vec(self, sentence):
-        sentence_arr = sentence.split(" ")
-        return list(map(lambda word: self.index[word.lower()], sentence_arr))
-
-    def match_glove(self, embedding_index, embedding_dim, normalize_word_fn=lambda word: word, verbose=True):
         """
-        match the word index with the word_embedding index
+        Converts a sentence into its word vector representation.
+
+        Keyword arguments:
+        sentence -- english sentence
+        """
+        sentence_arr = sentence.split(" ")
+
+        def convert(word):
+            if word in self.index:
+                return self.index[word.lower()]
+            else:
+                return self.index["<UNK>"]
+        return list(map(convert, sentence_arr))
+
+    def match_glove(self, embedding_index, embedding_dim, normalize_word_fn=word_net_lemmatizer_fn(), verbose=True):
+        """
+        Matches the word index with the word_embedding index.
         """
 
         unknown_words = []
         embedding_matrix = np.zeros((len(self.index) + 1, embedding_dim))
         for word, i in self.index.items():
-            embedding_vector = embedding_index.get(normalize_word_fn(word))
+            embedding_vector = embedding_index.get(word)
+
+            if embedding_vector is None:
+                embedding_vector = embedding_index.get(normalize_word_fn(word))
+
             if embedding_vector is not None:
                 # words not found in embedding index will be all-zeros.
                 embedding_matrix[i] = embedding_vector
@@ -82,18 +136,33 @@ class WordIndex:
         return (embedding_matrix, unknown_words)
 
 
-def get_max_length(x_train, x_test):
+def get_max_length(x_train, x_test=[]):
     """
-    Max Input Length
+    Returns the max length of the training and test data.
+
+    Keyword arguments:
+    x_train -- training features
+    x_test  -- testing features (default: [])
     """
     return max(map(lambda vec: len(vec), x_train + x_test))
 
 
-def pad_input(vec, maxlen):
-    return keras.preprocessing.sequence.pad_sequences(vec, maxlen=maxlen, padding='post')
+def pad_input(vec, max_length):
+    """
+    Pads the vec by appending zeros until a length of max_length is reached. 
+
+    Keyword arguments:
+    vec -- word vector representation
+    max_length -- max number of words in a sentence
+    """
+    return keras.preprocessing.sequence.pad_sequences(vec, maxlen=max_length, padding='post')
 
 
 class Rating():
+    """
+    Enables a quick and easy way to validate the model with custom sentences.
+    """
+
     def __init__(self, word_index, model):
         self.word_index = word_index
         self.model = model
