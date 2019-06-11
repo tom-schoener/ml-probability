@@ -6,7 +6,8 @@ good_reviews = [
     "good movie",
     "very good movie",
     "not a bad movie",
-    "not bad"
+    "not bad",
+    "not good"
 ]
 
 bad_reviews = [
@@ -37,7 +38,6 @@ def load_simple_data(good_reviews=good_reviews, bad_reviews=bad_reviews):
     # print(tokenizer.word_docs)
     # print(data)
     # print(tokenizer.texts_to_matrix(["very very good"]))
-
-    print(tokenizer.texts_to_sequences(["very very good"]))
+    # print(tokenizer.texts_to_sequences(["very very good"]))
 
     return (tokenizer, data)
