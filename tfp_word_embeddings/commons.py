@@ -1,13 +1,61 @@
 import os
 import re
 
+import pandas as pd
+import matplotlib.pyplot as plt
 import nltk
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
+
 from tensorflow.keras.datasets import imdb
 keras = tf.keras
+tfk = tf.keras
+
+tfkl = tfk.layers 
+tfd = tfp.distributions
+tfpl = tfp.layers
 
 
+def setup(glove_dir, embedding_dim=50):
+    """
+    Utility setup method loading all required datasets and word indecies.
+    """    
+    (x_train, y_train), (x_test, y_test) = load_imdb()
+
+    word_index = WordIndex(embedding_dim=embedding_dim)
+    embedding_index = load_glove_embedding(glove_dir, embedding_dim)
+    (embedding_matrix, unknown_words) = word_index.match_glove(embedding_index=embedding_index)
+    max_length = get_max_length(x_train, x_test)
+    
+    # pad input vectors
+    x_train_padded = pad_input(x_train, max_length)
+    x_test_padded = pad_input(x_test, max_length)
+    
+    embedding_layer = word_index.as_embedding_layer(x_train_padded, x_test_padded, embedding_matrix)
+    
+    return {
+        "train": (x_train, x_train_padded, y_train),
+        "test": (x_test, x_test_padded, y_test),
+        "word_index": word_index,
+        "embedding_layer": embedding_layer
+    } 
+
+
+def load_history_from_file(history_save_file):
+    """
+    Loads the preserved history from the saved csv file
+    """
+    try:
+        history_df = pd.read_csv(history_save_file, sep=";", index_col="epoch")
+        last_epoch = history_df.index[-1] + 1
+        print("Loaded history successfully. Last epoch: %i" % last_epoch)
+        return (history_df, last_epoch)
+    except FileNotFoundError:
+        print("No saved history file")
+        last_epoch = 0
+        return (None, last_epoch)
+    
 def load_imdb():
     """
     Loads the IMDB dataset and stores it locally for later use.
@@ -81,9 +129,10 @@ class WordIndex:
     Utility class to handle the imdb word index.
     """
 
-    def __init__(self, word_index=load_imdb_word_index()):
+    def __init__(self, word_index=load_imdb_word_index(), embedding_dim=50):
         self.index = word_index
         self.index_inverse = {v: k for k, v in self.index.items()}
+        self.embedding_dim = 50
 
     def vec2sentence(self, vec):
         """
@@ -111,13 +160,13 @@ class WordIndex:
                 return self.index["<UNK>"]
         return list(map(convert, sentence_arr))
 
-    def match_glove(self, embedding_index, embedding_dim, normalize_word_fn=word_net_lemmatizer_fn(), verbose=True):
+    def match_glove(self, embedding_index, normalize_word_fn=word_net_lemmatizer_fn(), verbose=True):
         """
         Matches the word index with the word_embedding index.
         """
 
         unknown_words = []
-        embedding_matrix = np.zeros((len(self.index) + 1, embedding_dim))
+        embedding_matrix = np.zeros((len(self.index) + 1, self.embedding_dim))
         for word, i in self.index.items():
             embedding_vector = embedding_index.get(word)
 
@@ -134,7 +183,16 @@ class WordIndex:
             print("{}/{} unknown words".format(len(unknown_words), len(self.index)))
 
         return (embedding_matrix, unknown_words)
-
+    
+    def as_embedding_layer(self, x_train, x_test, embedding_matrix):
+        """
+        Creates a keras embedding layers based on the word index. The weights are not trainable.
+        """
+        return tfkl.Embedding(len(self.index) + 1,
+                                self.embedding_dim,
+                                weights=[embedding_matrix],
+                                input_length=get_max_length(x_train, x_test),
+                                trainable=False)        
 
 def get_max_length(x_train, x_test=[]):
     """
@@ -191,3 +249,52 @@ class Rating():
         for (sentence, prediction, rating) in ratings:
             print("%s (%.2f%%)\n%s\n" %
                   (rating * "⭐", prediction * 100, sentence))
+
+def plot_confidence(means, stddevs, true_ys):
+    x = np.arange(0, len(means), 1)
+    y = means
+    yerr = np.array(stddevs) * 2
+
+    fig, ax = plt.subplots()
+    plt.xlabel("movie")
+    plt.ylabel("predicted probability")
+
+    ax.hlines(y=[0, 0.5, 1], xmin=0, xmax=len(x) - 1, linewidth=1, linestyle=":", color=["black", "gray", "black"])
+    ax.errorbar(x, y, yerr=yerr, fmt="o", elinewidth=1, color="black")
+    ax.errorbar(x, true_ys, fmt="x", color="r")
+    plt.show()
+    
+def plot_metric(name, history_df):
+    plt.xticks(np.arange(0, history_df.index[-1], 2))
+    plt.plot(history_df[name])
+    plt.plot(history_df["val_%s" % name])
+    plt.title('Model %s' % name)
+    plt.ylabel(name)
+    plt.xlabel('epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.grid(True)
+
+def get_keras_callbacks(model_save_file, history_save_file):
+    """
+    Returns a list of keras callbacks to save the model state and history.
+    """
+    return [
+        tfk.callbacks.CSVLogger(history_save_file, append=True, separator=';'),
+        tfk.callbacks.ModelCheckpoint(model_save_file, 
+                                      monitor='val_loss', 
+                                      verbose=0, 
+                                      save_best_only=True, 
+                                      save_weights_only=True, 
+                                      mode='auto')
+    ]
+    
+metrics = [
+    "acc",
+    tfk.metrics.TrueNegatives(name="true_negatives"),
+    tfk.metrics.FalseNegatives(name="false_negatives"),
+    tfk.metrics.TruePositives(name="true_positives"),
+    tfk.metrics.FalsePositives(name="false_positives"),
+    tfk.metrics.Precision(name="precision"),
+    tfk.metrics.Recall(name="recall"),
+    tfk.metrics.KLDivergence(name="kl"),
+]
