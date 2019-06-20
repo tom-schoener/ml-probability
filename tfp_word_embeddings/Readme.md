@@ -6,7 +6,7 @@ The Anavonda enviroment can be created using the following commands:
 ```sh
 conda env create -n tf2
 conda activate tf2
-pip install tensorflow==2.0.0-beta0 tensorflow-gpu==2.0.0-beta0 matplotlib nltk
+pip install tensorflow==2.0.0-beta1 tensorflow-gpu==2.0.0-beta1 tfp-nightly matplotlib nltk pandas
 conda install jupyter
 ```
 
