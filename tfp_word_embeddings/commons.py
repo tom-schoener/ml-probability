@@ -1,5 +1,7 @@
 import os
 import re
+import random
+import math
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,30 +18,35 @@ tfkl = tfk.layers
 tfd = tfp.distributions
 tfpl = tfp.layers
 
+
 def one_time_setup():
     import nltk
     nltk.download('wordnet')
+
 
 def mount_google_drive():
     from google.colab import drive
     drive.mount('/content/drive')
 
-def setup(glove_dir, embedding_dim=50):
+
+def setup(glove_dir, dataset_size=1.0, embedding_dim=50):
     """
     Utility setup method loading all required datasets and word indecies.
     """
-    (x_train, y_train), (x_test, y_test) = load_imdb()
+    (x_train, y_train), (x_test, y_test) = load_imdb(dataset_size)
 
     word_index = WordIndex(embedding_dim=embedding_dim)
     embedding_index = load_glove_embedding(glove_dir, embedding_dim)
-    (embedding_matrix, unknown_words) = word_index.match_glove(embedding_index=embedding_index)
+    (embedding_matrix, unknown_words) = word_index.match_glove(
+        embedding_index=embedding_index)
     max_length = get_max_length(x_train, x_test)
 
     # pad input vectors
     x_train_padded = pad_input(x_train, max_length)
     x_test_padded = pad_input(x_test, max_length)
 
-    embedding_layer = word_index.as_embedding_layer(x_train_padded, x_test_padded, embedding_matrix)
+    embedding_layer = word_index.as_embedding_layer(
+        x_train_padded, x_test_padded, embedding_matrix)
 
     return {
         "train": (x_train, x_train_padded, y_train),
@@ -63,15 +70,18 @@ def load_history_from_file(history_save_file):
         last_epoch = 0
         return (None, last_epoch)
 
-def load_imdb():
+
+def load_imdb(dataset_size):
     """
     Loads the IMDB dataset and stores it locally for later use.
     https://keras.io/datasets/#imdb-movie-reviews-sentiment-classification
     """
     INDEX_FROM = 0
+    (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=INDEX_FROM,
+                                                          seed=random.randint(1, 100))
 
-    (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=INDEX_FROM)
-    return ((x_train, y_train), (x_test, y_test))
+    size = math.floor(len(x_train) * dataset_size)
+    return ((x_train[:size], y_train[:size]), (x_test[:size], y_test[:size]))
 
 
 def load_imdb_word_index():
@@ -196,10 +206,11 @@ class WordIndex:
         Creates a keras embedding layers based on the word index. The weights are not trainable.
         """
         return tfkl.Embedding(len(self.index) + 1,
-                                self.embedding_dim,
-                                weights=[embedding_matrix],
-                                input_length=get_max_length(x_train, x_test),
-                                trainable=False)
+                              self.embedding_dim,
+                              weights=[embedding_matrix],
+                              input_length=get_max_length(x_train, x_test),
+                              trainable=False)
+
 
 def get_max_length(x_train, x_test=[]):
     """
@@ -257,6 +268,7 @@ class Rating():
             print("%s (%.2f%%)\n%s\n" %
                   (rating * "⭐", prediction * 100, sentence))
 
+
 def plot_confidence(means, stddevs, true_ys):
     x = np.arange(0, len(means), 1)
     y = means
@@ -266,13 +278,14 @@ def plot_confidence(means, stddevs, true_ys):
     plt.xlabel("movie")
     plt.ylabel("predicted probability")
 
-    ax.hlines(y=[0, 0.5, 1], xmin=0, xmax=len(x) - 1, linewidth=1, linestyle=":", color=["black", "gray", "black"])
+    ax.hlines(y=[0, 0.5, 1], xmin=0, xmax=len(x) - 1, linewidth=1,
+              linestyle=":", color=["black", "gray", "black"])
     ax.errorbar(x, y, yerr=yerr, fmt="o", elinewidth=1, color="black")
     ax.errorbar(x, true_ys, fmt="x", color="r")
     plt.show()
 
+
 def plot_metric(name, history_df):
-    plt.xticks(np.arange(0, history_df.index[-1], 2))
     plt.plot(history_df[name])
     plt.plot(history_df["val_%s" % name])
     plt.title('Model %s' % name)
@@ -280,6 +293,7 @@ def plot_metric(name, history_df):
     plt.xlabel('epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
     plt.grid(True)
+
 
 def get_keras_callbacks(model_save_file, history_save_file):
     """
@@ -294,6 +308,7 @@ def get_keras_callbacks(model_save_file, history_save_file):
                                       save_weights_only=True,
                                       mode='auto')
     ]
+
 
 metrics = [
     "acc",
