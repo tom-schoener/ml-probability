@@ -10,6 +10,11 @@ pip install tensorflow==2.0.0-beta1 tensorflow-gpu==2.0.0-beta1 tfp-nightly matp
 conda install jupyter
 ```
 
+# GloVe Word Embedding
+
+The GloVe word embedding can downloaded here: https://nlp.stanford.edu/projects/glove/
+Here, the Wikipedia crawl `glove.6B.zip` is used.
+
 # Python Notebooks
 
 | Name                | Description                    | Path                                                                |
