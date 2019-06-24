@@ -2,8 +2,6 @@ from models import DefaultDenseModel, DefaultConvModel, McDropoutModel, BayesByB
 import commons
 
 
-# commons.one_time_setup()
-
 glove_dir = "D:/google drive/haw/master/mastertheisis/hauptprojekt/glove"
 embedding_dim = 50
 dataset_size = 1.0
@@ -11,6 +9,7 @@ epochs = 0
 batch_size = 128
 words_per_sentence = 2800
 
+# commons.one_time_setup()
 setup = commons.setup(glove_dir=glove_dir,
                       embedding_dim=embedding_dim,
                       dataset_size=dataset_size,

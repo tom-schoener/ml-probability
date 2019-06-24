@@ -84,9 +84,8 @@ def load_imdb(dataset_size):
     Loads the IMDB dataset and stores it locally for later use.
     https://keras.io/datasets/#imdb-movie-reviews-sentiment-classification
     """
-    INDEX_FROM = 0
-    (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=INDEX_FROM,
-                                                          seed=random.randint(1, 100))
+    (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=3,
+                                                          seed=math.floor(dataset_size * 100))
 
     size = math.floor(len(x_train) * dataset_size)
     return ((x_train[:size], y_train[:size]), (x_test[:size], y_test[:size]))
@@ -100,6 +99,10 @@ def load_imdb_word_index():
     2: <UNK>
     """
     word_index = imdb.get_word_index()
+
+    for word, index in word_index.items():
+        word_index[word] = index + 3
+
     word_index["<PAD>"] = 0
     word_index["<START>"] = 1
     word_index["<UNK>"] = 2

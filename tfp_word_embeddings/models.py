@@ -84,6 +84,14 @@ class Model(metaclass=ABCMeta):
                       history_save_file=self.get_history_save_file(),
                       weights_only=weights_only))
 
+    def keras_summary(self):
+        return self.keras_model().summary()
+
+    def plot_history_metrics(self, metrics=["acc", "loss", "recall", "precision", "kl"]):
+        for metric in metrics:
+            cm.plot_metric(metric, history_df)
+            plt.show()
+
     def get_history_save_file(self):
         return os.path.abspath(os.path.join(self.history_dir, self.model_id() + ".csv"))
 
@@ -93,6 +101,10 @@ class Model(metaclass=ABCMeta):
     @property
     def embedding_layer(self):
         return self.setup["embedding_layer"]
+
+    @property
+    def word_index(self):
+        return self.setup["word_index"]
 
     @abstractmethod
     def keras_model(self):
