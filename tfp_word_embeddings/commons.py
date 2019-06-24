@@ -29,7 +29,7 @@ def mount_google_drive():
     drive.mount('/content/drive')
 
 
-def setup(glove_dir, dataset_size=1.0, embedding_dim=50):
+def setup(glove_dir, dataset_size=1.0, embedding_dim=50, words_per_sentence=2800):
     """
     Utility setup method loading all required datasets and word indecies.
     """
@@ -39,7 +39,11 @@ def setup(glove_dir, dataset_size=1.0, embedding_dim=50):
     embedding_index = load_glove_embedding(glove_dir, embedding_dim)
     (embedding_matrix, unknown_words) = word_index.match_glove(
         embedding_index=embedding_index)
-    max_length = get_max_length(x_train, x_test)
+
+    if words_per_sentence is None:
+        max_length = get_max_length(x_train, x_test)
+    else:
+        max_length = words_per_sentence
 
     # pad input vectors
     x_train_padded = pad_input(x_train, max_length)
@@ -65,10 +69,14 @@ def load_history_from_file(history_save_file):
         last_epoch = history_df.index[-1] + 1
         print("Loaded history successfully. Last epoch: %i" % last_epoch)
         return (history_df, last_epoch)
+    except pd.errors.EmptyDataError:
+        print("Cannot load history file (EmptyDataError)")
+    except OSError:
+        print("Cannot load history file (OSError)")
     except FileNotFoundError:
         print("No saved history file")
-        last_epoch = 0
-        return (None, last_epoch)
+
+    return (None, 0)
 
 
 def load_imdb(dataset_size):
@@ -295,7 +303,7 @@ def plot_metric(name, history_df):
     plt.grid(True)
 
 
-def get_keras_callbacks(model_save_file, history_save_file):
+def get_keras_callbacks(model_save_file, history_save_file, weights_only=False):
     """
     Returns a list of keras callbacks to save the model state and history.
     """
@@ -305,7 +313,7 @@ def get_keras_callbacks(model_save_file, history_save_file):
                                       monitor='val_loss',
                                       verbose=0,
                                       save_best_only=True,
-                                      save_weights_only=True,
+                                      save_weights_only=weights_only,
                                       mode='auto')
     ]
 
