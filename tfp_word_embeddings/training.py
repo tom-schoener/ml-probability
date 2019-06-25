@@ -16,7 +16,7 @@ def create_models(setup, models_dir, history_dir):
                           neurons_hidden_layers=[64, 64, 32]),
         DefaultConvModel(model_setup=setup,
                          models_dir=models_dir,
-                         history_dir=history_dir,),
+                         history_dir=history_dir),
         McDropoutModel(model_setup=setup,
                        models_dir=models_dir,
                        history_dir=history_dir,
@@ -41,7 +41,7 @@ def create_models(setup, models_dir, history_dir):
     return zip(models, weights_only_list)
 
 
-def train_models(models_dir, history_dir, glove_dir):
+def train_models(models_dir, history_dir, glove_dir, epochs=75):
     """
     Trains the models listed in create_models. The progess including the resulting weights of the model
     and the training history will be preserved at the specified location.
@@ -52,7 +52,6 @@ def train_models(models_dir, history_dir, glove_dir):
     embedding_dim = 50
     words_per_sentence = 2800
     dataset_sizes = [1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.01]
-    epochs = 75
     batch_size = 128
 
     for dataset_size in dataset_sizes:
