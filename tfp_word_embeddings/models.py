@@ -205,13 +205,6 @@ class McDropoutModel(Model):
 
 
 class BayesByBackpropModel(Model):
-
-    @staticmethod
-    def variational_layers():
-        return {
-
-        }
-
     def __init__(self, neurons_hidden_layers, variational_layer=tfpl.DenseReparameterization, *args, **kwargs):
         self.neurons_hidden_layers = neurons_hidden_layers
         self.variational_layer = variational_layer
