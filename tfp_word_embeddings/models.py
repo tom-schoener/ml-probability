@@ -5,6 +5,7 @@ from __future__ import print_function
 from abc import ABCMeta, abstractmethod
 import os
 import pathlib
+import math
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -39,14 +40,14 @@ class Model(metaclass=ABCMeta):
         self.models_dir = models_dir
         self.history_dir = history_dir
         self.validation_split = validation_split
-        self.N = len(self.setup["train"][0]) * (1 - validation_split)
+        self.N = self.calc_N(len(self.setup["train"][0]), validation_split)
 
         pathlib.Path(history_dir).mkdir(
             parents=True, exist_ok=True)
         pathlib.Path(models_dir).mkdir(
             parents=True, exist_ok=True)
 
-    def load_history(self):
+    def load_history(self, N=None):
         (history_df, last_epoch) = cm.load_history_from_file(
             self.get_history_save_file())
         return (history_df, last_epoch)
@@ -92,8 +93,12 @@ class Model(metaclass=ABCMeta):
             cm.plot_metric(metric, history_df)
             plt.show()
 
+    @staticmethod
+    def get_history_save_file_static(history_dir, model_id):
+        return os.path.abspath(os.path.join(history_dir, model_id + ".csv"))
+
     def get_history_save_file(self):
-        return os.path.abspath(os.path.join(self.history_dir, self.model_id() + ".csv"))
+        return self.get_history_save_file_static(self.history_dir, self.model_id())
 
     def get_model_save_file(self):
         return os.path.abspath(os.path.join(self.models_dir, self.model_id() + ".h5"))
@@ -115,11 +120,22 @@ class Model(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def model_id(self):
+    def model_id(self, N=None):
         pass
+
+    @abstractmethod
+    def readable_name(self):
+        pass
+
+    def is_variational(self):
+        return False
 
     def save_weights_only(self):
         return False
+
+    @staticmethod
+    def calc_N(training_size, validation_split):
+        return math.floor(training_size * (1.0 - validation_split))
 
 
 class DefaultDenseModel(Model):
@@ -141,11 +157,20 @@ class DefaultDenseModel(Model):
 
         return model
 
-    def model_id(self):
-        return "default_dense_%d_%s" % (self.N, "_".join(map(str, self.neurons_hidden_layers)))
+    @staticmethod
+    def model_id_static(N, neurons_hidden_layers):
+        return "default_dense_%d_%s" % (N, "_".join(map(str, neurons_hidden_layers)))
+
+    def model_id(self, N=None):
+        if N is None:
+            N = self.N
+        return self.model_id_static(N, self.neurons_hidden_layers)
 
     def save_weights_only(self):
         return False
+
+    def readable_name(self):
+        return "Dense NN"
 
 
 class DefaultConvModel(Model):
@@ -171,11 +196,20 @@ class DefaultConvModel(Model):
                       metrics=cm.metrics)
         return model
 
-    def model_id(self):
-        return "default_conv_%d" % self.N
+    @staticmethod
+    def model_id_static(N):
+        return "default_conv_%d" % N
+
+    def model_id(self, N=None):
+        if N is None:
+            N = self.N
+        return self.model_id_static(N)
 
     def save_weights_only(self):
         return False
+
+    def readable_name(self):
+        return "Conv NN"
 
 
 class McDropoutModel(Model):
@@ -212,12 +246,23 @@ class McDropoutModel(Model):
                       metrics=cm.metrics)
         return model
 
-    # TODO: more params?
-    def model_id(self):
-        return "mc_dropout_%d_%s" % (self.N, "_".join(map(str, self.neurons_hidden_layers)))
+    @staticmethod
+    def model_id_static(N, neurons_hidden_layers):
+        return "mc_dropout_%d_%s" % (N, "_".join(map(str, neurons_hidden_layers)))
+
+    def model_id(self, N=None):
+        if N is None:
+            N = self.N
+        return self.model_id_static(N, self.neurons_hidden_layers)
 
     def save_weights_only(self):
         return False
+
+    def is_variational(self):
+        return True
+
+    def readable_name(self):
+        return "MC Dropout"
 
 
 class BayesByBackpropModel(Model):
@@ -247,8 +292,20 @@ class BayesByBackpropModel(Model):
 
         return model
 
-    def model_id(self):
-        return "bayes_by_backprop_%s_%d_%s" % (self.variational_layer.__name__, self.N, "_".join(map(str, self.neurons_hidden_layers)))
+    @staticmethod
+    def model_id_static(N, neurons_hidden_layers, variational_layer):
+        return "bayes_by_backprop_%s_%d_%s" % (variational_layer.__name__, N, "_".join(map(str, neurons_hidden_layers)))
+
+    def model_id(self, N=None):
+        if N is None:
+            N = self.N
+        return self.model_id_static(N, self.neurons_hidden_layers, self.variational_layer)
 
     def save_weights_only(self):
         return True
+
+    def is_variational(self):
+        return True
+
+    def readable_name(self):
+        return "Bayes By Backprop (%s)" % self.variational_layer.__name__.replace("Dense", "")
