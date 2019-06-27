@@ -1,6 +1,6 @@
 # Environment
 
-All Jupyter Notebooks use Tensoflow 2.0 Beta. Some may still work with Tensorflow >1.13.
+All Jupyter Notebooks use Tensoflow 2.0 Beta, but most of the still work with Tensorflow >=1.13.
 The Anavonda enviroment can be created using the following commands:
 
 ```sh
@@ -15,10 +15,15 @@ conda install jupyter
 The GloVe word embedding can downloaded here: https://nlp.stanford.edu/projects/glove/
 Here, the Wikipedia crawl `glove.6B.zip` is used.
 
+# Pretrained models and training history
+
+All models are trained for 50 epochs and for different dataset sizes. You can download the trained models and history data from:
+https://drive.google.com/drive/folders/12ToPTgfyZaL8yteXZlmgKLqT1Wjck3G8?usp=sharing
+
 # Python Notebooks
 
 | Name                | Description                    | Path                                                                |
-|---------------------|--------------------------------|---------------------------------------------------------------------|
+| ------------------- | ------------------------------ | ------------------------------------------------------------------- |
 | Deep nn             | Deep nn with l2 regularization | [./nn/word_embedding_nn_0.ipynb](./nn/word_embedding_nn_0.ipynb)    |
 | CNN                 | CNN with Dropout               | [./nn/word_embedding_nn_1.ipynb](./nn/word_embedding_nn_1.ipynb)    |
 | MC Dropout          |                                | [./bnn/mc_dropout.ipynb](./bnn/mc_dropout.ipynb)                    |
