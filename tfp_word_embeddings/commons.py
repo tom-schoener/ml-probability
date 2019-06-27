@@ -56,7 +56,8 @@ def setup(glove_dir, dataset_size=1.0, embedding_dim=50, words_per_sentence=2800
         "train": (x_train, x_train_padded, y_train),
         "test": (x_test, x_test_padded, y_test),
         "word_index": word_index,
-        "embedding_layer": embedding_layer
+        "embedding_layer": embedding_layer,
+        "embedding_input_dim": words_per_sentence
     }
 
 

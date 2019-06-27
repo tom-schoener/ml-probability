@@ -51,9 +51,9 @@ class Model(metaclass=ABCMeta):
             self.get_history_save_file())
         return (history_df, last_epoch)
 
-    def load_model(self, weights_only):
+    def load_model(self):
         try:
-            if not weights_only:
+            if not self.save_weights_only():
                 model = tfk.models.load_model(self.get_model_save_file())
             else:
                 # https://github.com/tensorflow/probability/issues/325
@@ -67,10 +67,10 @@ class Model(metaclass=ABCMeta):
 
         return model
 
-    def fit(self, epochs, batch_size, weights_only=False):
+    def fit(self, epochs, batch_size):
         (x_train, x_train_padded, y_train) = self.setup["train"]
 
-        model = self.load_model(weights_only)
+        model = self.load_model()
         last_epoch = self.load_history()[1]
 
         model.fit(x_train_padded,
@@ -82,7 +82,7 @@ class Model(metaclass=ABCMeta):
                   callbacks=cm.get_keras_callbacks(
                       model_save_file=self.get_model_save_file(),
                       history_save_file=self.get_history_save_file(),
-                      weights_only=weights_only))
+                      weights_only=self.save_weights_only()))
 
     def keras_summary(self):
         return self.keras_model().summary()
@@ -103,6 +103,10 @@ class Model(metaclass=ABCMeta):
         return self.setup["embedding_layer"]
 
     @property
+    def embedding_input_dim(self):
+        return self.setup["embedding_input_dim"]
+
+    @property
     def word_index(self):
         return self.setup["word_index"]
 
@@ -113,6 +117,9 @@ class Model(metaclass=ABCMeta):
     @abstractmethod
     def model_id(self):
         pass
+
+    def save_weights_only(self):
+        return False
 
 
 class DefaultDenseModel(Model):
@@ -136,6 +143,9 @@ class DefaultDenseModel(Model):
 
     def model_id(self):
         return "default_dense_%d_%s" % (self.N, "_".join(map(str, self.neurons_hidden_layers)))
+
+    def save_weights_only(self):
+        return False
 
 
 class DefaultConvModel(Model):
@@ -164,6 +174,9 @@ class DefaultConvModel(Model):
     def model_id(self):
         return "default_conv_%d" % self.N
 
+    def save_weights_only(self):
+        return False
+
 
 class McDropoutModel(Model):
     def __init__(self, neurons_hidden_layers, tau=1.0, lengthscale=1e-2, dropout=0.5, *args, **kwargs):
@@ -179,7 +192,7 @@ class McDropoutModel(Model):
 
         # TODO: test input_shape
         inputs = tfk.Input(
-            shape=(self.embedding_layer.input_shape[1],), dtype='int32')
+            shape=(self.embedding_input_dim,), dtype='int32')
 
         inter = self.embedding_layer(inputs)
 
@@ -202,6 +215,9 @@ class McDropoutModel(Model):
     # TODO: more params?
     def model_id(self):
         return "mc_dropout_%d_%s" % (self.N, "_".join(map(str, self.neurons_hidden_layers)))
+
+    def save_weights_only(self):
+        return False
 
 
 class BayesByBackpropModel(Model):
@@ -233,3 +249,6 @@ class BayesByBackpropModel(Model):
 
     def model_id(self):
         return "bayes_by_backprop_%s_%d_%s" % (self.variational_layer.__name__, self.N, "_".join(map(str, self.neurons_hidden_layers)))
+
+    def save_weights_only(self):
+        return True

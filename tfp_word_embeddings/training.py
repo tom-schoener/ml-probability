@@ -9,7 +9,7 @@ def create_models(setup, models_dir, history_dir):
     Creates a list of trainable models.
     """
 
-    models = [
+    return [
         DefaultDenseModel(model_setup=setup,
                           models_dir=models_dir,
                           history_dir=history_dir,
@@ -36,10 +36,6 @@ def create_models(setup, models_dir, history_dir):
                              neurons_hidden_layers=[64, 64, 32])
     ]
 
-    weights_only_list = [False, False, False, True, True]
-
-    return zip(models, weights_only_list)
-
 
 def train_models(models_dir, history_dir, glove_dir, epochs=75, dataset_sizes=[1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.01]):
     """
@@ -61,8 +57,7 @@ def train_models(models_dir, history_dir, glove_dir, epochs=75, dataset_sizes=[1
         models = create_models(
             setup, models_dir=models_dir, history_dir=history_dir)
 
-        for model, weights_only in models:
+        for model in models:
             print("\n======\nTraining model %s\n======\n" % model.model_id())
 
-            model.fit(epochs=epochs, batch_size=batch_size,
-                      weights_only=weights_only)
+            model.fit(epochs=epochs, batch_size=batch_size)
