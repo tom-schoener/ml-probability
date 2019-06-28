@@ -1,6 +1,6 @@
 import tensorflow_probability as tfp
 
-from models import DefaultDenseModel, DefaultConvModel, McDropoutModel, BayesByBackpropModel
+from models import DefaultDenseModel, DefaultConvModel, McDropoutModel, BayesByBackpropModel, BayesianConvModel
 import commons
 
 
@@ -33,11 +33,14 @@ def create_models(setup, models_dir, history_dir):
                              models_dir=models_dir,
                              history_dir=history_dir,
                              variational_layer=tfp.layers.DenseReparameterization,
-                             neurons_hidden_layers=[64, 64, 32])
+                             neurons_hidden_layers=[64, 64, 32]),
+        BayesianConvModel(model_setup=setup,
+                          models_dir=models_dir,
+                          history_dir=history_dir,)
     ]
 
 
-def train_models(models_dir, history_dir, glove_dir, epochs=75, dataset_sizes=[1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.01]):
+def train_models(models_dir, history_dir, glove_dir, epochs=50, dataset_sizes=[1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.01], models_provider=create_models):
     """
     Trains the models listed in create_models. The progess including the resulting weights of the model
     and the training history will be preserved at the specified location.
@@ -54,7 +57,7 @@ def train_models(models_dir, history_dir, glove_dir, epochs=75, dataset_sizes=[1
                               embedding_dim=embedding_dim,
                               dataset_size=dataset_size,
                               words_per_sentence=words_per_sentence)
-        models = create_models(
+        models = models_provider(
             setup, models_dir=models_dir, history_dir=history_dir)
 
         for model in models:

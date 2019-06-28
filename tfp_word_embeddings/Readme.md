@@ -24,10 +24,11 @@ https://drive.google.com/drive/folders/12ToPTgfyZaL8yteXZlmgKLqT1Wjck3G8?usp=sha
 
 ## Python Notebooks
 
-| Name                | Description                              | Path                                                                |
-| ------------------- | ---------------------------------------- | ------------------------------------------------------------------- |
-| Deep NN             | Deep nn with l2 regularization           | [./nn/word_embedding_nn_0.ipynb](./nn/word_embedding_nn_0.ipynb)    |
-| CNN                 | CNN with Dropout                         | [./nn/word_embedding_nn_1.ipynb](./nn/word_embedding_nn_1.ipynb)    |
-| MC Dropout          | Using Dropout at prediction time         | [./bnn/mc_dropout.ipynb](./bnn/mc_dropout.ipynb)                    |
-| Bayes by Backprop   | Flipout and Reparameterization estimator | [./bnn/bayes_by_backprop.ipynb](./bnn/bayes_by_backprop.ipynb)      |
-| Distribution Lambda | Tests with TFPs variational layers       | [./bnn/distribution_lambda.ipynb](./bnn/distribution_lambda.ipynbb) |
+| Name                | Description                                     | Path                                                                |
+| ------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| Deep NN             | Deep nn with l2 regularization                  | [./nn/word_embedding_nn_0.ipynb](./nn/word_embedding_nn_0.ipynb)    |
+| CNN                 | CNN with Dropout                                | [./nn/word_embedding_nn_1.ipynb](./nn/word_embedding_nn_1.ipynb)    |
+| MC Dropout          | Using Dropout at prediction time                | [./bnn/mc_dropout.ipynb](./bnn/mc_dropout.ipynb)                    |
+| Bayes by Backprop   | Flipout and Reparameterization estimator        | [./bnn/bayes_by_backprop.ipynb](./bnn/bayes_by_backprop.ipynb)      |
+| Bayesian CNN        | uses comparable techniques as Bayes by Backprop | [./bnn/bayesian_cnn.ipynb](./bnn/bayesian_cnn.ipynb)                |
+| Distribution Lambda | Tests with TFPs variational layers              | [./bnn/distribution_lambda.ipynb](./bnn/distribution_lambda.ipynbb) |

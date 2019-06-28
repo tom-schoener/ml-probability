@@ -309,3 +309,53 @@ class BayesByBackpropModel(Model):
 
     def readable_name(self):
         return "Bayes By Backprop (%s)" % self.variational_layer.__name__.replace("Dense", "")
+
+
+class BayesianConvModel(Model):
+    def __init__(self, *args, **kwargs):
+        super(BayesianConvModel, self).__init__(*args, **kwargs)
+
+    def keras_model(self):
+        def kernel_divergence_fn(q, p, _):
+            return tfd.kl_divergence(q, p) / tf.cast(self.N, tf.float32)
+
+        model = tfk.Sequential([
+            self.embedding_layer,
+            tfpl.Convolution1DReparameterization(
+                128, 5, padding='SAME', activation="relu", kernel_divergence_fn=kernel_divergence_fn),
+            tfkl.MaxPooling1D(3),
+            tfpl.Convolution1DReparameterization(
+                64, 3, padding='SAME', activation="relu", kernel_divergence_fn=kernel_divergence_fn),
+            tfkl.MaxPooling1D(3),
+            tfkl.Flatten(),
+            tfpl.DenseReparameterization(64,
+                                         activation='relu',
+                                         kernel_divergence_fn=kernel_divergence_fn),
+            tfpl.DenseReparameterization(1,
+                                         activation='sigmoid',
+                                         kernel_divergence_fn=kernel_divergence_fn),
+        ], name=self.model_id())
+
+        model.compile(optimizer=tfk.optimizers.Adam(0.001),
+                      loss=tfk.losses.binary_crossentropy,
+                      metrics=cm.metrics)
+
+        return model
+
+    @staticmethod
+    def model_id_static(N):
+        return "bayesian_conv_%s_%d" % ("reparameterization", N)
+
+    def model_id(self, N=None):
+        if N is None:
+            N = self.N
+        return self.model_id_static(N)
+
+    def save_weights_only(self):
+        return True
+
+    def is_variational(self):
+        return True
+
+    def readable_name(self):
+        return "Bayesian Convolution (%s)" % "Reparameterization"
