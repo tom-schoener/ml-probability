@@ -22,10 +22,13 @@ Here, the Wikipedia crawl `glove.6B.zip` is used.
 All models are trained for 50 epochs and for different dataset sizes. You can download the trained models and history data from:
 https://drive.google.com/drive/folders/12ToPTgfyZaL8yteXZlmgKLqT1Wjck3G8?usp=sharing
 
-## Python Notebooks
+## Python Jupyter Notebooks
 
 | Name                | Description                                     | Path                                                                |
 | ------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| IMDB dataset        | Exploring the IMDB dataset                      | [./dataset.ipynb](./dataset.ipynb)                                  |
+| Evaluation          | comparing models                                | [./evaluation.ipynb](./evaluation.ipynb)                            |
+| ---                 | ---                                             | ---                                                                 |
 | Deep NN             | Deep nn with l2 regularization                  | [./nn/word_embedding_nn_0.ipynb](./nn/word_embedding_nn_0.ipynb)    |
 | CNN                 | CNN with Dropout                                | [./nn/word_embedding_nn_1.ipynb](./nn/word_embedding_nn_1.ipynb)    |
 | MC Dropout          | Using Dropout at prediction time                | [./bnn/mc_dropout.ipynb](./bnn/mc_dropout.ipynb)                    |
