@@ -29,32 +29,42 @@ def mount_google_drive():
     drive.mount('/content/drive')
 
 
-def setup(glove_dir, dataset_size=1.0, embedding_dim=50, words_per_sentence=2800):
+def setup(glove_dir, embedding_dim=50, trainingset_proportion=0.5, words_per_sentence=1000):
     """
     Utility setup method loading all required datasets and word indecies.
+
+    Keyword arguments:
+    glove_dir               -- GloVe directory as an absolute path
+    embedding_dim           -- dimension of the GloVe word embedding. (default: 50)
+    trainingset_proportion  -- training dataset proportion. Must be between 0 and 0.95.
+    words_per_sentence      -- max length of words in a review to be included in the returned datasets. All
+                               other sequences will have this length (padded with 0).
     """
-    (x_train, y_train), (x_test, y_test) = load_imdb(dataset_size)
+
+    dataset_props = [trainingset_proportion,
+                     1 - 0.05 - trainingset_proportion,
+                     0.05]
+    (x_train, y_train), (x_test, y_test), (x_validation, y_validation) = load_imdb(
+        dataset_proportions=dataset_props,
+        maxlen=words_per_sentence)
 
     word_index = WordIndex(embedding_dim=embedding_dim)
     embedding_index = load_glove_embedding(glove_dir, embedding_dim)
     (embedding_matrix, unknown_words) = word_index.match_glove(
         embedding_index=embedding_index)
 
-    if words_per_sentence is None:
-        max_length = get_max_length(x_train, x_test)
-    else:
-        max_length = words_per_sentence
-
     # pad input vectors
-    x_train_padded = pad_input(x_train, max_length)
-    x_test_padded = pad_input(x_test, max_length)
+    x_train_padded = pad_input(x_train, words_per_sentence)
+    x_test_padded = pad_input(x_test, words_per_sentence)
+    x_validation_padded = pad_input(x_validation, words_per_sentence)
 
     embedding_layer = word_index.as_embedding_layer(
-        x_train_padded, x_test_padded, embedding_matrix)
+        words_per_sentence, embedding_matrix)
 
     return {
         "train": (x_train, x_train_padded, y_train),
         "test": (x_test, x_test_padded, y_test),
+        "validation": (x_validation, x_validation_padded, y_validation),
         "word_index": word_index,
         "embedding_layer": embedding_layer,
         "embedding_input_dim": words_per_sentence
@@ -80,16 +90,32 @@ def load_history_from_file(history_save_file):
     return (None, 0)
 
 
-def load_imdb(dataset_size):
+def load_imdb(dataset_proportions=(0.5, 0.45, 0.05), maxlen=None):
     """
-    Loads the IMDB dataset and stores it locally for later use.
+    Loads the IMDB dataset and stores it locally for later use. Returns a triple with
+    (x_train, y_train), (x_test, y_test), (x_validation, y_validation)
     https://keras.io/datasets/#imdb-movie-reviews-sentiment-classification
+
+    Keyword arguments:
+    dataset_proportions     -- dataset proportions for train, test and validation sizes. Must add up to 1.
+    maxlen                  -- max length of words in a review to be included in the returned datasets
     """
     (x_train, y_train), (x_test, y_test) = imdb.load_data(index_from=3,
-                                                          seed=math.floor(dataset_size * 100))
+                                                          seed=math.floor(
+                                                              dataset_proportions[0] * 100),
+                                                          maxlen=maxlen)
 
-    size = math.floor(len(x_train) * dataset_size)
-    return ((x_train[:size], y_train[:size]), (x_test[:size], y_test[:size]))
+    x = np.concatenate((x_train, x_test))
+    y = np.concatenate((y_train, y_test))
+
+    dataset_proportions_cumsum = np.cumsum(dataset_proportions)
+    datasets = []
+    for start_prop, end_prop in zip([0, *dataset_proportions_cumsum[:-1]], dataset_proportions_cumsum):
+        start, end = (math.floor(len(x) * start_prop),
+                      math.floor(len(x) * end_prop))
+        datasets += [(x[start:end], y[start:end])]
+
+    return datasets
 
 
 def load_imdb_word_index():
@@ -213,14 +239,14 @@ class WordIndex:
 
         return (embedding_matrix, unknown_words)
 
-    def as_embedding_layer(self, x_train, x_test, embedding_matrix):
+    def as_embedding_layer(self, words_per_sentence, embedding_matrix):
         """
         Creates a keras embedding layers based on the word index. The weights are not trainable.
         """
         return tfkl.Embedding(len(self.index) + 1,
                               self.embedding_dim,
                               weights=[embedding_matrix],
-                              input_length=get_max_length(x_train, x_test),
+                              input_length=words_per_sentence,
                               trainable=False)
 
 

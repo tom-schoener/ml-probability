@@ -35,12 +35,11 @@ class Model(metaclass=ABCMeta):
     Base model class.
     """
 
-    def __init__(self, model_setup, validation_split=0.05, models_dir="./models/", history_dir="./history/", embedding_dim=50):
+    def __init__(self, model_setup, models_dir="./models/", history_dir="./history/", embedding_dim=50):
         self.setup = model_setup
         self.models_dir = models_dir
         self.history_dir = history_dir
-        self.validation_split = validation_split
-        self.N = self.calc_N(len(self.setup["train"][0]), validation_split)
+        self.N = len(self.training_data[0])
 
         pathlib.Path(history_dir).mkdir(
             parents=True, exist_ok=True)
@@ -69,14 +68,16 @@ class Model(metaclass=ABCMeta):
         return model
 
     def fit(self, epochs, batch_size):
-        (x_train, x_train_padded, y_train) = self.setup["train"]
+        (x_train, x_train_padded, y_train) = self.training_data
+        (x_validation, x_validation_padded, y_validation) = self.validation_data
 
         model = self.load_model()
         last_epoch = self.load_history()[1]
 
         model.fit(x_train_padded,
                   y_train,
-                  validation_split=self.validation_split,
+                  validation_data=(x_validation_padded,
+                                   y_validation),
                   initial_epoch=last_epoch,
                   epochs=epochs,
                   batch_size=batch_size,
@@ -102,6 +103,18 @@ class Model(metaclass=ABCMeta):
 
     def get_model_save_file(self):
         return os.path.abspath(os.path.join(self.models_dir, self.model_id() + ".h5"))
+
+    @property
+    def training_data(self):
+        return self.setup["train"]
+
+    @property
+    def testing_data(self):
+        return self.setup["test"]
+
+    @property
+    def validation_data(self):
+        return self.setup["validation"]
 
     @property
     def embedding_layer(self):
@@ -132,10 +145,6 @@ class Model(metaclass=ABCMeta):
 
     def save_weights_only(self):
         return False
-
-    @staticmethod
-    def calc_N(training_size, validation_split):
-        return math.floor(training_size * (1.0 - validation_split))
 
 
 class DefaultDenseModel(Model):
