@@ -317,7 +317,7 @@ class BayesByBackpropModel(Model):
         return True
 
     def readable_name(self):
-        return "Bayes By Backprop (%s)" % self.variational_layer.__name__.replace("Dense", "")
+        return "Bayes By Backprop (%s)" % self.variational_layer.__name__.replace("Dense", "").replace("Reparameterization", "Reparam.")
 
 
 class BayesianConvModel(Model):
@@ -367,4 +367,4 @@ class BayesianConvModel(Model):
         return True
 
     def readable_name(self):
-        return "Bayesian Convolution (%s)" % "Reparameterization"
+        return "Bayesian Convolution (%s)" % "Reparam."
