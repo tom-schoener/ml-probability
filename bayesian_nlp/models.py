@@ -148,6 +148,9 @@ class Model(metaclass=ABCMeta):
 
 
 class DefaultDenseModel(Model):
+    """
+    The default dense model is a simple perceptron with l2 regularization.
+    """
     def __init__(self, neurons_hidden_layers, *args, **kwargs):
         self.neurons_hidden_layers = neurons_hidden_layers
         super(DefaultDenseModel, self).__init__(*args, **kwargs)
@@ -183,6 +186,11 @@ class DefaultDenseModel(Model):
 
 
 class DefaultConvModel(Model):
+    """
+    The default convolutional model uses a combination of convolutional layers and max pooling.
+    For its regularization dropout is used.
+    """
+    
     def __init__(self, *args, **kwargs):
         super(DefaultConvModel, self).__init__(*args, **kwargs)
 
@@ -222,6 +230,11 @@ class DefaultConvModel(Model):
 
 
 class McDropoutModel(Model):
+    """
+    This model is very similar to the default perceptron. The key difference is that is uses
+    dropout at prediction time.
+    """
+
     def __init__(self, neurons_hidden_layers, tau=1.0, lengthscale=1e-2, dropout=0.5, *args, **kwargs):
         self.neurons_hidden_layers = neurons_hidden_layers
         self.tau = tau
@@ -233,7 +246,6 @@ class McDropoutModel(Model):
         reg = self.lengthscale**2 * \
             (1 - self.dropout) / (2. * self.N * self.tau)
 
-        # TODO: test input_shape
         inputs = tfk.Input(
             shape=(self.embedding_input_dim,), dtype='int32')
 
@@ -275,6 +287,11 @@ class McDropoutModel(Model):
 
 
 class BayesByBackpropModel(Model):
+    """
+    A BNN implementing the bayes by backprop method. To apply gradient descent a flipout or reparameterization
+    estimator can be used.  
+    """
+
     def __init__(self, neurons_hidden_layers, variational_layer=tfpl.DenseReparameterization, *args, **kwargs):
         self.neurons_hidden_layers = neurons_hidden_layers
         self.variational_layer = variational_layer
@@ -321,6 +338,11 @@ class BayesByBackpropModel(Model):
 
 
 class BayesianConvModel(Model):
+    """
+    Similar to the default convolutional model. It uses a variational convolution layer with
+    reparameterization estimator.
+    """
+
     def __init__(self, *args, **kwargs):
         super(BayesianConvModel, self).__init__(*args, **kwargs)
 

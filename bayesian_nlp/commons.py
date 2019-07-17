@@ -274,7 +274,7 @@ def pad_input(vec, max_length):
 
 class Rating():
     """
-    Enables a quick and easy way to validate the model with custom sentences.
+    Provides a quick and easy way to validate the model with custom sentences.
     """
 
     def __init__(self, word_index, model):
@@ -308,22 +308,39 @@ class Rating():
 
 
 def plot_confidence(means, stddevs, true_ys):
+    """
+    Plots the confidence using errorbars.
+
+    Keyword arguments:
+    means    -- expectations
+    stddevs  -- samples standard deviations
+    true_ys  -- true y values
+    """
     x = np.arange(0, len(means), 1)
     y = means
     yerr = np.array(stddevs) * 2
 
     fig, ax = plt.subplots()
     plt.xlabel("movie")
-    plt.ylabel("predicted probability")
+    plt.ylabel("prediction")
 
-    ax.hlines(y=[0, 0.5, 1], xmin=0, xmax=len(x) - 1, linewidth=1,
-              linestyle=":", color=["black", "gray", "black"])
+    ax.hlines(y=[0.4, 0.5, 0.6], xmin=0, xmax=len(x) - 1, linewidth=1,
+              linestyle=":", color=["gray", "black", "gray"])
+    ax.hlines(y=[0, 1], xmin=0, xmax=len(x) - 1, linewidth=1,
+              linestyle="--", color=["black", "black"])
     ax.errorbar(x, y, yerr=yerr, fmt="o", elinewidth=1, color="black")
     ax.errorbar(x, true_ys, fmt="x", color="r")
-    plt.show()
+
 
 
 def plot_metric(name, history_df):
+    """
+    Plots the metric.
+
+    Keyword arguments:
+    name       -- name of the metric
+    history_df -- history dataframe
+    """
     plt.plot(history_df[name])
     plt.plot(history_df["val_%s" % name])
     plt.title('Model %s' % name)
@@ -336,6 +353,11 @@ def plot_metric(name, history_df):
 def get_keras_callbacks(model_save_file, history_save_file, weights_only=False):
     """
     Returns a list of keras callbacks to save the model state and history.
+
+    Keyword arguments:
+    model_save_file    -- absolute model file path
+    history_save_file  -- absolute history file path
+    weights_only       -- set to True to save only the weights
     """
     return [
         tfk.callbacks.CSVLogger(history_save_file, append=True, separator=';'),
@@ -346,7 +368,6 @@ def get_keras_callbacks(model_save_file, history_save_file, weights_only=False):
                                       save_weights_only=weights_only,
                                       mode='auto')
     ]
-
 
 metrics = [
     "acc",

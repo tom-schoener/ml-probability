@@ -42,7 +42,7 @@ def create_models(setup, models_dir, history_dir):
 
 def train_models(models_dir, history_dir, glove_dir, epochs=50, dataset_sizes=[0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.005], models_provider=create_models):
     """
-    Trains the models listed in create_models. The progess including the resulting weights of the model
+    Trains the models provided by models_provider. The progress including the resulting weights of the model
     and the training history will be preserved at the specified location.
     """
 
